@@ -1,0 +1,15 @@
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Firebase credentials
+Secrets/firebase-service-account.json
+Secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
