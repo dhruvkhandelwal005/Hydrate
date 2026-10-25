@@ -3,8 +3,7 @@ import { RuneField } from "../ui/Fx";
 import "./app.css";
 
 const LINKS = [
-    { to: "/packs", label: "Event packs" },
-    { to: "/cases/new", label: "New case" },
+    { to: "/cases/new", label: "New case & Packs" },
 ];
 
 export default function AppShell() {

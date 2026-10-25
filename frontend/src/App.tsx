@@ -15,7 +15,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingRoute />} />
         <Route element={<AppShell />}>
-          <Route path="/packs" element={<Packs />} />
+          <Route path="/packs" element={<Navigate to="/cases/new" replace />} />
           <Route path="/cases/new" element={<CaseIntake />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
