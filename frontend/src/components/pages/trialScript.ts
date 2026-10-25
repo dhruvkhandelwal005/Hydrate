@@ -68,6 +68,39 @@ export interface ExecutiveDirective {
     detail: string;
 }
 
+export interface ExposureEvidenceItem {
+    id: string; // e.g. "ORV-0412" or "T-07 row 5"
+    docId?: string;
+    tradeRow?: string;
+    label: string;
+    description?: string;
+}
+
+export interface ExposureMetric {
+    display: string; // e.g. "55%", "20%", "28 to 42%", or "insufficient evidence"
+    low?: number;
+    high?: number;
+    docId?: string;
+    tradeRow?: string;
+    isInsufficient?: boolean;
+}
+
+export interface ExposureRow {
+    id: string;
+    country: string;
+    sector: string;
+    thorHigh: ExposureMetric;
+    lokiLow: ExposureMetric;
+    odinFinal: ExposureMetric;
+    evidence: ExposureEvidenceItem[];
+    nextQuarterOutlook: {
+        projectedRange: string;
+        trajectory: "improving" | "stable" | "deteriorating" | "unquantified";
+        assumptions: string;
+    };
+    category: "benchmark" | "trial";
+}
+
 export interface TrialScriptData {
     thor: {
         claims: Claim[];
@@ -586,3 +619,256 @@ export async function runTrialStep(step: "round1" | "round2" | "odin") {
             };
     }
 }
+
+export const EXPOSURE_ROWS: ExposureRow[] = [
+    {
+        id: "exp-1",
+        country: "Country A",
+        sector: "Chemicals",
+        thorHigh: {
+            display: "55%",
+            low: 40,
+            high: 55,
+            docId: "ORV-0412",
+            tradeRow: "T-07 row 5",
+        },
+        lokiLow: {
+            display: "20%",
+            low: 20,
+            high: 35,
+            docId: "ORV-0711",
+        },
+        odinFinal: {
+            display: "28 to 42%",
+            low: 28,
+            high: 42,
+            docId: "ORV-0412",
+        },
+        evidence: [
+            { id: "ORV-0412", docId: "ORV-0412", label: "ORV-0412", description: "Rotterdam Deep-Water Terminal Congestion Manifest" },
+            { id: "T-07 row 5", docId: "ORV-0412", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Commodity Trade Flows — Polymer Feedstock Demurrage" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "14 to 22%",
+            trajectory: "improving",
+            assumptions: "Secondary feeder barges via Wilhelmshaven clear bulk monomer vessel queue within 45 days.",
+        },
+        category: "benchmark",
+    },
+    {
+        id: "exp-2",
+        country: "Country A",
+        sector: "Grain",
+        thorHigh: {
+            display: "30%",
+            low: 15,
+            high: 30,
+            docId: "ORV-0388",
+        },
+        lokiLow: {
+            display: "5%",
+            low: 5,
+            high: 12,
+            docId: "ORV-0544",
+        },
+        odinFinal: {
+            display: "10 to 18%",
+            low: 10,
+            high: 18,
+            docId: "ORV-0388",
+        },
+        evidence: [
+            { id: "ORV-0388", docId: "ORV-0388", label: "ORV-0388", description: "Agro-Bulk Grain Corridor Routing Telemetry" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "4 to 9%",
+            trajectory: "improving",
+            assumptions: "Domestic rail grain reserves and Baltic land swaps normalize regional mill supply before next harvest.",
+        },
+        category: "benchmark",
+    },
+    {
+        id: "exp-3",
+        country: "Country B",
+        sector: "Chemicals",
+        thorHigh: {
+            display: "40%",
+            low: 25,
+            high: 40,
+            docId: "ORV-0501",
+        },
+        lokiLow: {
+            display: "15%",
+            low: 15,
+            high: 24,
+            docId: "ORV-0680",
+        },
+        odinFinal: {
+            display: "20 to 30%",
+            low: 20,
+            high: 30,
+            docId: "ORV-0501",
+        },
+        evidence: [
+            { id: "ORV-0501", docId: "ORV-0501", label: "ORV-0501", description: "Specialty Chemicals Force Majeure Filings & Spot Index" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "12 to 20%",
+            trajectory: "improving",
+            assumptions: "Alternative Iberian & Turkish chemical synthesizers ramp production to fulfill bilateral supplier contracts.",
+        },
+        category: "benchmark",
+    },
+    {
+        id: "exp-4",
+        country: "Netherlands / Belgium",
+        sector: "Chemicals & Polymers",
+        thorHigh: {
+            display: "55%",
+            low: 40,
+            high: 55,
+            docId: "ORV-0412",
+            tradeRow: "T-07 row 5",
+        },
+        lokiLow: {
+            display: "15%",
+            low: 5,
+            high: 15,
+            docId: "ORV-0711",
+        },
+        odinFinal: {
+            display: "28 to 42%",
+            low: 28,
+            high: 42,
+            docId: "ORV-0412",
+        },
+        evidence: [
+            { id: "ORV-0412", docId: "ORV-0412", label: "ORV-0412", description: "Rotterdam Berth Radar Manifest & Demurrage Report" },
+            { id: "T-07 row 5", docId: "ORV-0412", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Trade Matrix: Antwerp Liquid Chemical Inflow" },
+            { id: "ORV-0711", docId: "ORV-0711", label: "ORV-0711", description: "EU Strategic Petroleum & Petrochemical Reserves Directive" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "14 to 22%",
+            trajectory: "improving",
+            assumptions: "Strategic reserve releases stabilize feedstock pricing while feeder vessels bypass deep-water bottlenecks.",
+        },
+        category: "trial",
+    },
+    {
+        id: "exp-5",
+        country: "Taiwan",
+        sector: "Semiconductors & Automotive MCUs",
+        thorHigh: {
+            display: "42%",
+            low: 25,
+            high: 42,
+            docId: "ORV-0388",
+        },
+        lokiLow: {
+            display: "10%",
+            low: 10,
+            high: 22,
+            docId: "ORV-0544",
+        },
+        odinFinal: {
+            display: "18 to 28%",
+            low: 18,
+            high: 28,
+            docId: "ORV-0388",
+        },
+        evidence: [
+            { id: "ORV-0388", docId: "ORV-0388", label: "ORV-0388", description: "Microelectronics Supply Route & Lead Time Audit" },
+            { id: "ORV-0544", docId: "ORV-0544", label: "ORV-0544", description: "Master Supplier Agreements Annex C (ISO-9001 Dual-Sourcing)" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "8 to 15%",
+            trajectory: "improving",
+            assumptions: "Tier-1 automotive fabs switch 40% of microelectronic procurement to qualified European secondary fabs.",
+        },
+        category: "trial",
+    },
+    {
+        id: "exp-6",
+        country: "Germany",
+        sector: "Specialty Alloys & Titanium",
+        thorHigh: {
+            display: "48%",
+            low: 38,
+            high: 48,
+            docId: "ORV-0501",
+        },
+        lokiLow: {
+            display: "insufficient evidence",
+            isInsufficient: true,
+        },
+        odinFinal: {
+            display: "38 to 48%",
+            low: 38,
+            high: 48,
+            docId: "ORV-0501",
+        },
+        evidence: [
+            { id: "ORV-0501", docId: "ORV-0501", label: "ORV-0501", description: "Precision Titanium Spot Pricing Index & Force Majeure Notices" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "25 to 35%",
+            trajectory: "stable",
+            assumptions: "Limited smelter elasticity sustains elevated spot premiums; no counter-evidence found in docket.",
+        },
+        category: "trial",
+    },
+    {
+        id: "exp-7",
+        country: "Poland",
+        sector: "Overland Rail & Intermodal Freight",
+        thorHigh: {
+            display: "30%",
+            low: 15,
+            high: 30,
+            docId: "ORV-0622",
+        },
+        lokiLow: {
+            display: "insufficient evidence",
+            isInsufficient: true,
+        },
+        odinFinal: {
+            display: "15 to 30%",
+            low: 15,
+            high: 30,
+            docId: "ORV-0622",
+        },
+        evidence: [
+            { id: "ORV-0622", docId: "ORV-0622", label: "ORV-0622", description: "Central Eurasian Rail Gauging and Bottleneck Telemetry" },
+        ],
+        nextQuarterOutlook: {
+            projectedRange: "10 to 18%",
+            trajectory: "improving",
+            assumptions: "Expedited border customs throughput relieves 30% of transshipment yard backlog.",
+        },
+        category: "trial",
+    },
+    {
+        id: "exp-8",
+        country: "Norway",
+        sector: "Renewable Power & Grid Equipment",
+        thorHigh: {
+            display: "insufficient evidence",
+            isInsufficient: true,
+        },
+        lokiLow: {
+            display: "insufficient evidence",
+            isInsufficient: true,
+        },
+        odinFinal: {
+            display: "insufficient evidence",
+            isInsufficient: true,
+        },
+        evidence: [],
+        nextQuarterOutlook: {
+            projectedRange: "insufficient evidence",
+            trajectory: "unquantified",
+            assumptions: "No claims or trade telemetries submitted for Nordic hydro or power grid infrastructure.",
+        },
+        category: "trial",
+    },
+];

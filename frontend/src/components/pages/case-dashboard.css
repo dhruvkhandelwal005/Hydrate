@@ -71,8 +71,9 @@
     padding: 20px;
     border: 1px solid var(--rg-line);
     border-radius: 10px;
-    background: rgba(14, 36, 24, 0.82);
-    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+    background: rgba(14, 36, 24, 0.96);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
 }
 
 .rg-dashboard-panel h3 {
@@ -197,7 +198,7 @@
     padding: 14px;
     border: 1px solid var(--rg-line);
     border-radius: 8px;
-    background: rgba(8, 24, 15, 0.42);
+    background: rgba(8, 24, 15, 0.88);
 }
 
 .rg-governance-state {
@@ -298,7 +299,7 @@
     padding: 14px;
     border: 1px solid var(--rg-line);
     border-radius: 8px;
-    background: rgba(8, 24, 15, 0.42);
+    background: rgba(8, 24, 15, 0.88);
 }
 
 .rg-finding-group h4 {
@@ -391,7 +392,7 @@
 
 .rg-source-backdrop {
     position: fixed;
-    z-index: 30;
+    z-index: 100;
     inset: 0;
     display: grid;
     place-items: center;
@@ -433,7 +434,7 @@
     gap: 7px 12px;
     padding: 13px;
     border-radius: 7px;
-    background: rgba(8, 24, 15, 0.6);
+    background: rgba(8, 24, 15, 0.92);
     font-size: 14px;
 }
 
@@ -459,8 +460,43 @@
     overflow-wrap: anywhere;
 }
 
-.rg-source-warning {
-    color: #f3b7a8;
+.rg-source-trade-row {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(216, 222, 74, 0.15);
+    border: 1px solid rgba(216, 222, 74, 0.35);
+    color: var(--rg-gold);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.rg-source-context {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(14, 36, 24, 0.9);
+    border-left: 3px solid var(--rg-gold);
+    color: var(--rg-text);
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.rg-briefing-exposure-section {
+    margin: 24px 0 16px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(155, 176, 143, 0.2);
+}
+
+.rg-briefing-exposure-head h4 {
+    margin: 6px 0 4px;
+    font-size: 18px;
+    color: var(--rg-text);
+}
+
+.rg-briefing-exposure-head p {
+    margin: 0 0 14px;
+    color: var(--rg-dim);
     font-size: 13px;
 }
 

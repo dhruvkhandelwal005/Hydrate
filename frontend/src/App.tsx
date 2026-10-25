@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import Landing from "./components/pages/Landing";
 import AppShell from "./components/layout/AppShell";
-import Packs from "./components/pages/Packs";
 import CaseIntake from "./components/pages/CaseIntake";
 
 function LandingRoute() {
@@ -15,7 +14,6 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingRoute />} />
         <Route element={<AppShell />}>
-          <Route path="/packs" element={<Navigate to="/cases/new" replace />} />
           <Route path="/cases/new" element={<CaseIntake />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

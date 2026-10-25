@@ -6,6 +6,8 @@ import type {
     LogLine,
     OdinRuling,
 } from "./trialScript";
+import ExposureTable from "./ExposureTable";
+import DocumentPdfModal from "./DocumentPdfModal";
 import "./case-dashboard.css";
 
 type Props = {
@@ -34,6 +36,11 @@ export default function CaseDashboard({
     complete,
 }: Props) {
     const [sourceId, setSourceId] = useState<string | null>(null);
+    const [selectedEvidenceDetail, setSelectedEvidenceDetail] = useState<{
+        docId: string;
+        tradeRow?: string;
+        context?: string;
+    } | null>(null);
     const sourceClaim = claims.find((claim) => claim.docId === sourceId);
     const sourceFile = pack?.files?.find((file) => file.doc_id === sourceId);
     const sourceRetrievedAt = logs.find((line) => line.docIds?.includes(sourceId ?? ""))?.time;
@@ -101,60 +108,22 @@ export default function CaseDashboard({
                 <section className="rg-dashboard-panel rg-exposure-panel" aria-labelledby="rg-exposure-title">
                     <div className="rg-dashboard-panel-head">
                         <div>
-                            <span className="rg-dashboard-kicker">Risk range</span>
-                            <h3 id="rg-exposure-title">Exposure by country &amp; sector</h3>
+                            <span className="rg-dashboard-kicker">Risk range · FR7.3</span>
+                            <h3 id="rg-exposure-title">Exposure table by country &amp; sector</h3>
                         </div>
-                        <span className="rg-dashboard-note">Claim estimates</span>
+                        <span className="rg-dashboard-note">FR7.4 Click-through enabled</span>
                     </div>
-                    {!caseFile ? (
-                        <p className="rg-dashboard-empty">Create a case to view its exposure estimates.</p>
-                    ) : claims.length === 0 ? (
-                        <p className="rg-dashboard-empty">Exposure ranges will appear when Thor and Loki submit evidence-backed claims.</p>
-                    ) : (
-                        <>
-                            <p className="rg-dashboard-note rg-exposure-disclaimer">
-                                Scope shown here is illustrative demo-claim metadata. Ranges are the agents’ claim estimates, not a verified aggregate.
-                            </p>
-                            <div className="rg-dashboard-table-wrap">
-                                <table className="rg-dashboard-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Country</th>
-                                            <th>Sector</th>
-                                            <th>Position</th>
-                                            <th>Low</th>
-                                            <th>High</th>
-                                            <th>Evidence</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {claims.map((claim) => (
-                                            <tr key={claim.id}>
-                                                <td>{claim.country}</td>
-                                                <td>{claim.sector}</td>
-                                                <td>
-                                                    <span className={`rg-dashboard-side ${claim.id.startsWith("T-") ? "thor" : "loki"}`}>
-                                                        {claim.id.startsWith("T-") ? "Thor" : "Loki"}
-                                                    </span>
-                                                </td>
-                                                <td>{claim.estimateLow}%</td>
-                                                <td>{claim.estimateHigh}%</td>
-                                                <td>
-                                                    <button
-                                                        type="button"
-                                                        className="rg-dashboard-source-link"
-                                                        onClick={() => setSourceId(claim.docId)}
-                                                    >
-                                                        {claim.docId}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </>
-                    )}
+                    <p className="rg-dashboard-note rg-exposure-disclaimer">
+                        Exposure indicates expected trade value drop (%) versus pre-event baseline over Q+1. Thor high, Loki low, and Odin final ranges remain strictly separated. Click any metric or evidence chip to inspect citations.
+                    </p>
+                    <ExposureTable
+                        onSelectSource={(docId, tradeRow, context) => {
+                            setSelectedEvidenceDetail({ docId, tradeRow, context });
+                            setSourceId(docId);
+                        }}
+                        complete={complete}
+                        isBriefingVariant={false}
+                    />
                 </section>
             </div>
 
@@ -264,6 +233,25 @@ export default function CaseDashboard({
                                 ))}
                             </ul>
                         </div>
+                        {/* Briefing Exposure Grid & Next-Quarter Outlook (FR8.2) */}
+                        <div className="rg-briefing-exposure-section">
+                            <div className="rg-briefing-exposure-head">
+                                <span className="rg-dashboard-kicker">Briefing exposure &amp; outlook · FR8.2</span>
+                                <h4>Consolidated Exposure Grid &amp; Next-Quarter Forecast</h4>
+                                <p>
+                                    Odin’s final ruling ranges synthesized strictly from Established and Contested claims, accompanied by forward-looking next-quarter projections and key operational assumptions.
+                                </p>
+                            </div>
+                            <ExposureTable
+                                onSelectSource={(docId, tradeRow, context) => {
+                                    setSelectedEvidenceDetail({ docId, tradeRow, context });
+                                    setSourceId(docId);
+                                }}
+                                complete={complete}
+                                isBriefingVariant={true}
+                            />
+                        </div>
+
                         <div className="rg-dashboard-source-note">
                             <strong>Source timestamps:</strong> citations open the Runemark document record. The current API supplies retrieval times in the feed, but not document publication timestamps.
                         </div>
@@ -272,48 +260,14 @@ export default function CaseDashboard({
             </section>
 
             {sourceId && (
-                <div className="rg-source-backdrop" onMouseDown={(event) => {
-                    if (event.target === event.currentTarget) setSourceId(null);
-                }}>
-                    <section className="rg-source-dialog" role="dialog" aria-modal="true" aria-labelledby="rg-source-title">
-                        <div className="rg-source-dialog-head">
-                            <div>
-                                <span className="rg-dashboard-kicker">Runemark citation</span>
-                                <h3 id="rg-source-title">{sourceId}</h3>
-                            </div>
-                            <button type="button" className="rg-source-close" onClick={() => setSourceId(null)} aria-label="Close source details">
-                                ×
-                            </button>
-                        </div>
-                        {sourceClaim ? (
-                            <>
-                                <p className="rg-source-name">{sourceClaim.docName}</p>
-                                <p>{sourceClaim.body}</p>
-                                <dl className="rg-source-meta">
-                                    <dt>Claim</dt><dd>{sourceClaim.id} · {sourceClaim.title}</dd>
-                                    <dt>Classification</dt><dd>{sourceClaim.nature === "fact" ? "Sourced fact" : "Agent inference"}</dd>
-                                    <dt>Estimate</dt><dd>{sourceClaim.estimateLow}%–{sourceClaim.estimateHigh}%</dd>
-                                </dl>
-                            </>
-                        ) : (
-                            <p>This citation appears in the trial log but has no document detail in the current frontend data.</p>
-                        )}
-                        {sourceFile && (
-                            <p className="rg-source-file">
-                                Pack manifest: {sourceFile.path} · {sourceFile.status.toLowerCase()}
-                                {sourceFile.reason ? ` · ${sourceFile.reason}` : ""}
-                            </p>
-                        )}
-                        <p className="rg-source-time">
-                            {sourceRetrievedAt ? `Retrieved during this case at ${sourceRetrievedAt}.` : "No retrieval timestamp is available for this citation."}
-                        </p>
-                        {!sourceFile && (
-                            <p className="rg-source-warning">
-                                This demo citation is not present in the selected pack manifest; verify the source against Runemark before treating it as evidence.
-                            </p>
-                        )}
-                    </section>
-                </div>
+                <DocumentPdfModal
+                    docId={sourceId}
+                    tradeRow={selectedEvidenceDetail?.tradeRow}
+                    onClose={() => {
+                        setSourceId(null);
+                        setSelectedEvidenceDetail(null);
+                    }}
+                />
             )}
         </section>
     );

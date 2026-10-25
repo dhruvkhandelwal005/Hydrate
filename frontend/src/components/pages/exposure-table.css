@@ -1,0 +1,473 @@
+/* ==========================================================================
+   Nine Realms — Exposure Table Styles (FR7.3 & FR8.2)
+   ========================================================================== */
+
+.rg-exposure-table-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* Controls Bar */
+.rg-exposure-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.rg-exposure-tabs {
+    display: flex;
+    gap: 6px;
+    background: rgba(8, 24, 15, 0.85);
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid var(--rg-line, rgba(155, 176, 143, 0.2));
+}
+
+.rg-exposure-tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--rg-dim, #9bb08f);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rg-exposure-tab:hover {
+    color: var(--rg-text, #edf5e8);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.rg-exposure-tab.active {
+    background: rgba(216, 222, 74, 0.15);
+    border-color: rgba(216, 222, 74, 0.35);
+    color: var(--rg-gold, #d8de4a);
+    box-shadow: 0 0 10px rgba(216, 222, 74, 0.1);
+}
+
+.rg-exposure-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.rg-exposure-search input {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--rg-line, rgba(155, 176, 143, 0.25));
+    background: rgba(8, 24, 15, 0.9);
+    color: var(--rg-text, #edf5e8);
+    font-family: inherit;
+    font-size: 12px;
+    width: 200px;
+    transition: border-color 0.2s ease, width 0.2s ease;
+}
+
+.rg-exposure-search input:focus {
+    outline: none;
+    border-color: var(--rg-gold, #d8de4a);
+    width: 240px;
+}
+
+.rg-exposure-toggle-group {
+    display: flex;
+    gap: 4px;
+    background: rgba(8, 24, 15, 0.85);
+    padding: 3px;
+    border-radius: 6px;
+    border: 1px solid var(--rg-line, rgba(155, 176, 143, 0.2));
+}
+
+.rg-toggle-btn {
+    padding: 5px 10px;
+    border-radius: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--rg-dim, #9bb08f);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.rg-toggle-btn.active {
+    background: rgba(138, 218, 255, 0.16);
+    color: #8adaff;
+}
+
+/* Calibration & Scoring Bar */
+.rg-calibration-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(8, 24, 15, 0.92);
+    border: 1px solid rgba(216, 222, 74, 0.2);
+    border-radius: 8px;
+    box-shadow: inset 0 0 16px rgba(0, 0, 0, 0.3);
+}
+
+.rg-calib-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rg-calib-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rg-dim, #9bb08f);
+    font-weight: 700;
+}
+
+.rg-calib-val {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--rg-text, #edf5e8);
+}
+
+.rg-calib-val.high-precision {
+    color: var(--rg-gold, #d8de4a);
+}
+
+.rg-calib-val.unit {
+    color: #8adaff;
+}
+
+.rg-calib-val.rule {
+    color: #9affc3;
+}
+
+/* Table Wrapper */
+.rg-exposure-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 176, 143, 0.25);
+    background: rgba(14, 36, 24, 0.96);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+}
+
+.rg-exposure-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.rg-exposure-table th {
+    padding: 12px 14px;
+    background: rgba(6, 18, 12, 0.95);
+    border-bottom: 2px solid rgba(155, 176, 143, 0.3);
+    font-weight: 600;
+    vertical-align: top;
+}
+
+.th-side-tag {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+
+.th-side-tag.thor {
+    color: #8adaff;
+}
+
+.th-side-tag.loki {
+    color: #9affc3;
+}
+
+.th-side-tag.odin {
+    color: var(--rg-gold, #d8de4a);
+}
+
+.th-side-tag.outlook {
+    color: #ffd27d;
+}
+
+.th-side-tag.evidence {
+    color: #d2b9ff;
+}
+
+.th-sub {
+    display: block;
+    font-size: 10px;
+    color: var(--rg-dim, #9bb08f);
+    font-weight: 400;
+    margin-top: 2px;
+}
+
+.rg-exposure-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(155, 176, 143, 0.16);
+    vertical-align: middle;
+}
+
+.rg-exposure-row:hover td {
+    background: rgba(216, 222, 74, 0.04);
+}
+
+/* Cell Styles */
+.cell-country {
+    white-space: nowrap;
+}
+
+.cell-country strong {
+    display: block;
+    color: var(--rg-text, #edf5e8);
+    font-size: 14px;
+}
+
+.rg-benchmark-tag {
+    display: inline-block;
+    margin-top: 3px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: rgba(216, 222, 74, 0.15);
+    border: 1px solid rgba(216, 222, 74, 0.3);
+    color: var(--rg-gold, #d8de4a);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.cell-sector span {
+    color: rgba(237, 245, 232, 0.85);
+    font-weight: 500;
+}
+
+/* Metric Buttons (Clickable for FR7.4) */
+.rg-metric-cell-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 5px;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rg-metric-cell-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.rg-metric-cell-btn.thor {
+    color: #8adaff;
+    background: rgba(138, 218, 255, 0.08);
+    border-color: rgba(138, 218, 255, 0.25);
+}
+
+.rg-metric-cell-btn.thor:hover {
+    background: rgba(138, 218, 255, 0.2);
+    border-color: #8adaff;
+}
+
+.rg-metric-cell-btn.loki {
+    color: #9affc3;
+    background: rgba(154, 255, 195, 0.08);
+    border-color: rgba(154, 255, 195, 0.25);
+}
+
+.rg-metric-cell-btn.loki:hover {
+    background: rgba(154, 255, 195, 0.2);
+    border-color: #9affc3;
+}
+
+.rg-metric-cell-btn.odin {
+    color: var(--rg-gold, #d8de4a);
+    background: rgba(216, 222, 74, 0.1);
+    border-color: rgba(216, 222, 74, 0.3);
+}
+
+.rg-metric-cell-btn.odin:hover {
+    background: rgba(216, 222, 74, 0.22);
+    border-color: var(--rg-gold, #d8de4a);
+}
+
+.metric-link-icon {
+    font-size: 11px;
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+}
+
+.rg-metric-cell-btn:hover .metric-link-icon {
+    opacity: 1;
+}
+
+/* Insufficient Evidence (Strict Requirement) */
+.rg-insufficient-evidence {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(255, 100, 100, 0.08);
+    border: 1px dashed rgba(255, 140, 140, 0.25);
+    color: rgba(255, 170, 170, 0.85);
+    font-size: 11px;
+    font-style: italic;
+    font-weight: 500;
+}
+
+.rg-odin-pending {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(216, 222, 74, 0.06);
+    border: 1px dotted rgba(216, 222, 74, 0.3);
+    color: rgba(216, 222, 74, 0.7);
+    font-size: 11px;
+    font-style: italic;
+}
+
+/* Evidence Chips (FR7.4) */
+.rg-evidence-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.rg-evidence-chips .rg-doc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(210, 185, 255, 0.3);
+    background: rgba(210, 185, 255, 0.08);
+    color: #e4d7ff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.rg-evidence-chips .rg-doc-chip:hover {
+    background: rgba(210, 185, 255, 0.2);
+    border-color: #d2b9ff;
+    transform: translateY(-1px);
+    color: #fff;
+}
+
+.rg-chip-icon {
+    font-size: 10px;
+}
+
+/* Next-Quarter Outlook Cell (FR8.2) */
+.rg-outlook-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 280px;
+}
+
+.rg-outlook-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.outlook-range {
+    font-size: 13px;
+    color: var(--rg-text, #edf5e8);
+}
+
+.outlook-range strong {
+    color: #ffd27d;
+    font-variant-numeric: tabular-nums;
+}
+
+.outlook-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.outlook-badge.improving {
+    background: rgba(154, 255, 195, 0.15);
+    color: #9affc3;
+    border: 1px solid rgba(154, 255, 195, 0.3);
+}
+
+.outlook-badge.stable {
+    background: rgba(255, 210, 125, 0.15);
+    color: #ffd27d;
+    border: 1px solid rgba(255, 210, 125, 0.3);
+}
+
+.outlook-assumption {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.35;
+    color: var(--rg-dim, #9bb08f);
+}
+
+/* Footer / Legend */
+.rg-exposure-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(8, 24, 15, 0.88);
+    border-radius: 6px;
+    border: 1px solid var(--rg-line, rgba(155, 176, 143, 0.16));
+    font-size: 11px;
+}
+
+.rg-exposure-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    color: var(--rg-dim, #9bb08f);
+}
+
+.rg-exposure-legend .c-thor {
+    color: #8adaff;
+}
+
+.rg-exposure-legend .c-loki {
+    color: #9affc3;
+}
+
+.rg-exposure-legend .c-odin {
+    color: var(--rg-gold, #d8de4a);
+}
+
+.rg-exposure-compliance {
+    font-family: ui-monospace, "Cascadia Code", monospace;
+    font-size: 10px;
+    color: rgba(216, 222, 74, 0.8);
+    letter-spacing: 0.04em;
+}
+
+.rg-exposure-empty {
+    text-align: center;
+    padding: 24px;
+    color: var(--rg-dim, #9bb08f);
+    font-style: italic;
+}

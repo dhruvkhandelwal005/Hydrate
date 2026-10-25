@@ -19,3 +19,19 @@ A minimal monorepo starter for the Nine Realms project.
 | Backend | TBD |
 | Frontend | TBD |
 | API contracts | TBD |
+
+## Exposure Metrics Specification (FR7.3 & FR8.2)
+
+### Open Question for Organizers
+> **Clarification Required:** Which unit does "true exposure" use in the evaluation ground truth?
+> - **Option A:** Expected percentage drop in trade **volume** (metric tons / TEUs) over a stated horizon.
+> - **Option B:** Expected percentage drop in trade **value** (USD equivalent) versus pre-event baseline.
+> - **Horizon Window:** Next quarter (Q+1, 90-day window) versus annualized run-rate.
+
+### Current Implementation Choice
+Pending organizer confirmation, the Nine Realms engine adopts:
+- **Unit:** Expected percent drop in trade value (USD) versus pre-event baseline.
+- **Period:** Next quarter (Q+1 forward-looking outlook).
+- **Format:** Low number and high number ranges for each country-sector pair (Thor high, Loki low, Odin final).
+- **Rule:** Missing evidence displays `insufficient evidence`—no numbers are fabricated.
+

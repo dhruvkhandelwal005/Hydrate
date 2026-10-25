@@ -4,6 +4,8 @@ import { api } from "../../lib/api";
 import type { CaseSummary, DocStatus, PackState, PackStatus } from "../../types/api";
 import { AgentPath, ClockGate, CountUp, GateOverlay, RealmRing, Spot, prefersReduced } from "../ui/Fx";
 import CaseDashboard from "./CaseDashboard";
+import DocumentPdfModal from "./DocumentPdfModal";
+import runemarkMap from "../../assets/runemark_map.png";
 import {
     TRIAL_SCRIPT,
     formatLogTime,
@@ -119,10 +121,12 @@ export default function CaseIntake() {
         }
     }, [odinLogs]);
 
-    // Document click handler
-    const handleOpenSource = useCallback((docId: string) => {
-        // Will be wired to /sources/:id
-        console.log("Open source document:", docId);
+    // Document PDF viewer modal state
+    const [activePdfDoc, setActivePdfDoc] = useState<{ docId: string; tradeRow?: string } | null>(null);
+
+    const handleOpenSource = useCallback((docId: string, tradeRow?: string) => {
+        console.log("Open source document PDF:", docId, tradeRow);
+        setActivePdfDoc({ docId, tradeRow });
     }, []);
 
     // -------------------------------------------------------------------------
@@ -207,7 +211,7 @@ export default function CaseIntake() {
 
     const packStats = useMemo(() => {
         if (!packDetail) return null;
-        const c = packDetail.counts;
+        const c = packDetail.counts || {};
         return {
             valid: c.VALID ?? 0,
             partial: c.PARTIAL ?? 0,
@@ -408,6 +412,12 @@ export default function CaseIntake() {
 
     return (
         <>
+            {/* Runemark Ancient Map Background */}
+            <div className="rg-map-backdrop" aria-hidden="true">
+                <img src={runemarkMap} alt="Runemark Map" className="rg-map-img" />
+                <div className="rg-map-overlay" />
+            </div>
+
             <h1>Trial Intake & Packs</h1>
             <p className="rg-lede">
                 Upload and inspect your Runemark event packs, frame your question, and advance through the
@@ -944,6 +954,9 @@ export default function CaseIntake() {
                                             className={`rg-log-card rg-claim-pop ${
                                                 claim.status === "conceded" ? "rg-conceded" : ""
                                             }`}
+                                            onClick={() => handleOpenSource(claim.docId)}
+                                            style={{ cursor: "pointer" }}
+                                            title={`Click to open official PDF evidence for ${claim.id} (${claim.docName})`}
                                         >
                                             <div className="rg-log-meta">
                                                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -1138,6 +1151,9 @@ export default function CaseIntake() {
                                             className={`rg-log-card rg-claim-pop ${
                                                 claim.status === "conceded" ? "rg-conceded" : ""
                                             }`}
+                                            onClick={() => handleOpenSource(claim.docId)}
+                                            style={{ cursor: "pointer" }}
+                                            title={`Click to open official PDF evidence for ${claim.id} (${claim.docName})`}
                                         >
                                             <div className="rg-log-meta">
                                                 <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
@@ -1367,7 +1383,13 @@ export default function CaseIntake() {
 
                             <div className="rg-ruling-grid">
                                 {odinRulings.map((r) => (
-                                    <div key={r.claimId} className="rg-ruling-card">
+                                    <div
+                                        key={r.claimId}
+                                        className="rg-ruling-card"
+                                        onClick={() => handleOpenSource(r.docId)}
+                                        style={{ cursor: "pointer" }}
+                                        title={`Click to open backing evidence PDF [${r.docId}]`}
+                                    >
                                         <div className="rg-ruling-head">
                                             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                                                 <span
@@ -1384,7 +1406,10 @@ export default function CaseIntake() {
                                                 <button
                                                     type="button"
                                                     className="rg-doc-chip"
-                                                    onClick={() => handleOpenSource(r.docId)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenSource(r.docId);
+                                                    }}
                                                 >
                                                     📄 {r.docId}
                                                 </button>
@@ -1437,6 +1462,15 @@ export default function CaseIntake() {
 
             {/* Trial Gavel Strike Lightning Overlay */}
             {gateOverlay && <GateOverlay />}
+
+            {/* Authentic PDF Document Viewer Popup Modal */}
+            {activePdfDoc && (
+                <DocumentPdfModal
+                    docId={activePdfDoc.docId}
+                    tradeRow={activePdfDoc.tradeRow}
+                    onClose={() => setActivePdfDoc(null)}
+                />
+            )}
         </>
     );
-}
+}
