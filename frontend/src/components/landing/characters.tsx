@@ -641,7 +641,7 @@ export function Actor(p: ActorProps) {
                 e.stopPropagation();
                 const x = e.nativeEvent.clientX;
                 drag.current = { pointerId: e.pointerId, startX: x, lastX: x, moved: false };
-                e.target.setPointerCapture(e.pointerId);
+                (e.target as unknown as Element | null)?.setPointerCapture?.(e.pointerId);
                 document.body.style.cursor = "grabbing";
             }}
             onPointerMove={(e) => {
@@ -658,14 +658,14 @@ export function Actor(p: ActorProps) {
                 const activeDrag = drag.current;
                 if (!activeDrag || activeDrag.pointerId !== e.pointerId) return;
                 e.stopPropagation();
-                e.target.releasePointerCapture(e.pointerId);
+                (e.target as unknown as Element | null)?.releasePointerCapture?.(e.pointerId);
                 activeDrag.pointerId = null;
                 document.body.style.cursor = "grab";
             }}
             onPointerCancel={(e) => {
                 const activeDrag = drag.current;
                 if (!activeDrag || activeDrag.pointerId !== e.pointerId) return;
-                e.target.releasePointerCapture(e.pointerId);
+                (e.target as unknown as Element | null)?.releasePointerCapture?.(e.pointerId);
                 drag.current = null;
                 document.body.style.cursor = "";
             }}
