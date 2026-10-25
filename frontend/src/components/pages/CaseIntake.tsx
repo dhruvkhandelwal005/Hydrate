@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
 import type { CaseSummary, DocStatus, PackState, PackStatus } from "../../types/api";
 import { AgentPath, ClockGate, CountUp, GateOverlay, RealmRing, Spot, prefersReduced } from "../ui/Fx";
+import CaseDashboard from "./CaseDashboard";
 import {
     TRIAL_SCRIPT,
     formatLogTime,
@@ -1421,6 +1422,18 @@ export default function CaseIntake() {
                     )}
                 </div>
             </section>
+
+            <CaseDashboard
+                caseFile={created}
+                pack={packDetail}
+                claims={[...thorClaims, ...lokiClaims]}
+                logs={[...thorLogs, ...lokiLogs, ...odinLogs].sort((a, b) => a.time.localeCompare(b.time))}
+                rulings={odinRulings}
+                directives={TRIAL_SCRIPT.odin.directives}
+                synthesis={TRIAL_SCRIPT.odin.synthesis}
+                riskScore={TRIAL_SCRIPT.odin.riskScore}
+                complete={phase === "ruled"}
+            />
 
             {/* Trial Gavel Strike Lightning Overlay */}
             {gateOverlay && <GateOverlay />}

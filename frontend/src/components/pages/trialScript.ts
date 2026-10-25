@@ -11,6 +11,8 @@ export interface Claim {
     body: string;
     docId: string;
     docName: string;
+    country: string;
+    sector: string;
     confidence: number;
     estimateLow: number;
     estimateHigh: number;
@@ -95,6 +97,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Vessel queuing exceeds 42 container ships. Inbound raw polymers face indefinite demurrage, exceeding plant storage buffers.",
                 docId: "ORV-0412",
                 docName: "Rotterdam_Berth_Manifest_Q3.pdf",
+                country: "Netherlands / Belgium",
+                sector: "Chemicals",
                 confidence: 94,
                 estimateLow: 40,
                 estimateHigh: 55,
@@ -118,6 +122,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Disruption at Malacca Strait bypasses adds 18 transit days. Automotive OEM safety buffers depleted within 12 days.",
                 docId: "ORV-0388",
                 docName: "Microelectronics_Supply_Route_Audit.docx",
+                country: "Taiwan",
+                sector: "Semiconductors / Automotive",
                 confidence: 89,
                 estimateLow: 25,
                 estimateHigh: 42,
@@ -130,6 +136,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Spot contracts triggering force majeure notices across 7 major aerospace and precision manufacturing suppliers.",
                 docId: "ORV-0501",
                 docName: "Trade_Table_Commodities_Index.csv",
+                country: "Germany",
+                sector: "Specialty alloys",
                 confidence: 91,
                 estimateLow: 38,
                 estimateHigh: 48,
@@ -142,6 +150,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Transshipment terminals along Polish and Kazakh corridors cannot absorb maritime container diversion.",
                 docId: "ORV-0622",
                 docName: "Central_Eurasian_Rail_Throughput.txt",
+                country: "Poland",
+                sector: "Port logistics",
                 confidence: 86,
                 estimateLow: 15,
                 estimateHigh: 30,
@@ -249,6 +259,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Government-mandated reserves of critical polymers and diesel are fully primed. No industrial rationing required before Day 45.",
                 docId: "ORV-0711",
                 docName: "EU_Energy_And_Reserves_Directive.pdf",
+                country: "Netherlands / Germany",
+                sector: "Chemicals / Energy",
                 confidence: 92,
                 estimateLow: 5,
                 estimateHigh: 15,
@@ -261,6 +273,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Contracts mandate automatic secondary supplier activation within 72 hours. Alternative Turkish & Iberian fabs absorb 60% of shortfall.",
                 docId: "ORV-0544",
                 docName: "Master_Supplier_Agreements_Annex_C.docx",
+                country: "Taiwan",
+                sector: "Semiconductors",
                 confidence: 88,
                 estimateLow: 10,
                 estimateHigh: 22,
@@ -273,6 +287,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Lightweight chips and microcontrollers rerouted via chartered belly cargo with only a 1.2% final unit cost impact.",
                 docId: "ORV-0490",
                 docName: "Global_Air_Cargo_Availability_Matrix.xlsx",
+                country: "Taiwan",
+                sector: "Electronics",
                 confidence: 85,
                 estimateLow: 8,
                 estimateHigh: 18,
@@ -294,6 +310,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 body: "Commodity price spikes are speculative paper panics by futures desks. Physical customs manifests confirm continuous bilateral flow.",
                 docId: "ORV-0680",
                 docName: "Commodity_Exchange_Spot_Deliveries.txt",
+                country: "Netherlands",
+                sector: "Commodities",
                 confidence: 90,
                 estimateLow: 12,
                 estimateHigh: 20,
