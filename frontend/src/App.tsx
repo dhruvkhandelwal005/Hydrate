@@ -6,7 +6,7 @@ import CaseIntake from "./components/pages/CaseIntake";
 
 function LandingRoute() {
   const navigate = useNavigate();
-  return <Landing onEnter={() => navigate("/packs")} />;
+  return <Landing onEnter={() => navigate("/cases/new")} />;
 }
 
 export default function App() {

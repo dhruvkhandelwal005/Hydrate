@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
     AdditiveBlending,
@@ -21,7 +21,7 @@ import { Actor, RULING_AT, clamp, easeOut, lerp, type DirRef, type Director } fr
 const GOLD = "#f2e21a";
 const LIME = "#c8d92b";
 
-type Props = { reduce: boolean; onRuling: () => void; onEnter: () => void };
+type Props = { reduce: boolean; onRuling: () => void; onEnter: () => void; onAssetsReady: () => void };
 
 /* ---------- clock: one timeline for everything ---------- */
 function Clock({ director, reduce }: { director: DirRef; reduce: boolean }) {
@@ -200,10 +200,6 @@ function Bench({ director }: { director: DirRef }) {
                 <boxGeometry args={[3.7, 0.04, 1.8]} />
                 {gold}
             </mesh>
-            <mesh position={[0, 3.0, 0.27]} rotation={[0, 0, Math.PI / 4]}>
-                <boxGeometry args={[0.5, 0.5, 0.04]} />
-                {gold}
-            </mesh>
         </group>
     );
 }
@@ -376,10 +372,19 @@ function Impact({
 }
 
 /* ---------- scene ---------- */
-export default function Arena({ reduce, onRuling, onEnter }: Props) {
+export default function Arena({ reduce, onRuling, onEnter, onAssetsReady }: Props) {
     const director = useRef<Director>({ t: reduce ? 99 : 0, ruled: reduce, calm: reduce ? 1 : 0 });
     const shake = useRef(0);
     const odinHand = useRef<Object3D | null>(null);
+    const readyActors = useRef(new Set<string>());
+    const readyNotified = useRef(false);
+    const markActorReady = useCallback((kind: string) => {
+        readyActors.current.add(kind);
+        if (!readyNotified.current && readyActors.current.size === 4) {
+            readyNotified.current = true;
+            onAssetsReady();
+        }
+    }, [onAssetsReady]);
 
     return (
         <Canvas
@@ -397,10 +402,10 @@ export default function Arena({ reduce, onRuling, onEnter }: Props) {
             <Arc director={director} />
 
             {/* Heimdall: first, rises in the foreground and blows the horn */}
-            <Actor kind="heimdall" director={director} home={[0, -0.5, 3]} from={[0, -4, 3]} delay={0.2} dur={0.9} scale={0.8} />
+            <Actor kind="heimdall" director={director} home={[0, -0.5, 3]} from={[0, -4, 3]} delay={0.2} dur={0.9} scale={0.8} onReady={() => markActorReady("heimdall")} />
             {/* Thor and Loki walk in and face each other as rivals */}
-            <Actor kind="thor" director={director} home={[-2.5, 0, 0]} from={[-9, 0, 0]} delay={0.8} dur={1.0} rotY={0.25} settleRotY={0.25} scale={1.2} />
-            <Actor kind="loki" director={director} home={[2.5, 0, 0]} from={[9, 0, 0]} delay={0.8} dur={1.0} rotY={-0.25} settleRotY={-0.25} scale={1.2} />
+            <Actor kind="thor" director={director} home={[-2.5, 0, 0]} from={[-9, 0, 0]} delay={0.8} dur={1.0} rotY={0.25} settleRotY={0.25} scale={1.2} onReady={() => markActorReady("thor")} />
+            <Actor kind="loki" director={director} home={[2.5, 0, 0]} from={[9, 0, 0]} delay={0.8} dur={1.0} rotY={-0.25} settleRotY={-0.25} scale={1.2} onReady={() => markActorReady("loki")} />
             {/* Odin drops in last, the gavel decides, click him to enter */}
             <Actor
                 kind="odin"
@@ -411,6 +416,7 @@ export default function Arena({ reduce, onRuling, onEnter }: Props) {
                 dur={1.1}
                 overshoot
                 handRef={odinHand}
+                onReady={() => markActorReady("odin")}
                 onClick={onEnter}
             />
 

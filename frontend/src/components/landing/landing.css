@@ -70,6 +70,195 @@
 .nr-canvas { position: absolute; inset: 0; z-index: 3; }
 .nr-canvas canvas { display: block; }
 
+.nr-cta-stage {
+    position: absolute;
+    z-index: 4;
+    top: 46.5%;
+    left: 50%;
+    perspective: 900px;
+    transform: translate(-50%, -50%);
+}
+
+.nr-continue {
+    position: relative;
+    display: grid;
+    grid-template-columns: 48px 1fr 22px;
+    grid-template-rows: 1fr auto;
+    align-items: center;
+    width: min(300px, 72vw);
+    min-height: 86px;
+    padding: 12px 22px 10px;
+    overflow: hidden;
+    color: #fbffd9;
+    border: 1px solid rgba(242, 226, 26, 0.9);
+    border-radius: 8px;
+    background:
+        linear-gradient(115deg, rgba(7, 36, 16, 0.96), rgba(16, 76, 34, 0.96) 55%, rgba(8, 43, 20, 0.98)),
+        #0b3d1a;
+    box-shadow:
+        0 0 0 4px rgba(200, 217, 43, 0.16),
+        0 12px 28px rgba(0, 0, 0, 0.55),
+        inset 0 1px rgba(255, 255, 220, 0.22),
+        inset 0 -3px rgba(0, 0, 0, 0.22);
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: border-color 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+}
+
+.nr-continue::before,
+.nr-continue::after {
+    position: absolute;
+    content: "";
+    pointer-events: none;
+}
+
+.nr-continue::before {
+    inset: 5px;
+    border: 1px solid rgba(200, 217, 43, 0.35);
+    border-radius: 4px;
+}
+
+.nr-continue::after {
+    inset: 0;
+    background: linear-gradient(110deg, transparent 18%, rgba(255, 255, 220, 0.13) 48%, transparent 72%);
+    transform: translateX(-110%);
+    transition: transform 550ms ease;
+}
+
+.nr-continue:hover,
+.nr-continue:focus-visible {
+    border-color: #fffbd0;
+    box-shadow:
+        0 0 0 4px rgba(200, 217, 43, 0.24),
+        0 0 30px rgba(242, 226, 26, 0.4),
+        0 16px 34px rgba(0, 0, 0, 0.58),
+        inset 0 1px rgba(255, 255, 220, 0.3);
+    outline: none;
+}
+
+.nr-continue:hover::after,
+.nr-continue:focus-visible::after { transform: translateX(110%); }
+.nr-continue:disabled { cursor: progress; }
+
+.nr-continue-cloud {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    width: 42px;
+    fill: rgba(226, 237, 183, 0.95);
+    stroke: #f2e21a;
+    stroke-width: 1.5;
+    filter: drop-shadow(0 0 7px rgba(200, 217, 43, 0.55));
+    animation: nr-cloud-breathe 3.2s ease-in-out infinite;
+}
+
+.nr-cloud-glow {
+    fill: none;
+    stroke: rgba(255, 255, 220, 0.85);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.nr-continue-label {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: start;
+    padding-left: 5px;
+    color: #fbffd9;
+    font: 800 20px/1 "Arial Narrow", "Trebuchet MS", sans-serif;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6), 0 0 12px rgba(200, 217, 43, 0.35);
+}
+
+.nr-continue-bolt {
+    grid-column: 3;
+    grid-row: 1 / 3;
+    width: 18px;
+    fill: #f2e21a;
+    filter: drop-shadow(0 0 5px rgba(242, 226, 26, 0.8));
+    animation: nr-cta-spark 2.4s ease-in-out infinite;
+}
+
+.nr-continue-caption {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    padding: 5px 0 0 5px;
+    color: rgba(226, 237, 183, 0.78);
+    font: 600 9px/1 "Trebuchet MS", sans-serif;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+}
+
+@keyframes nr-cloud-breathe {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-3px) scale(1.05); }
+}
+
+@keyframes nr-cta-spark {
+    0%, 84%, 100% { opacity: 0.72; transform: scale(0.96); }
+    88% { opacity: 1; transform: scale(1.16); }
+    92% { opacity: 0.68; transform: scale(0.9); }
+}
+
+.nr-storm-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 6;
+    overflow: hidden;
+    perspective: 1000px;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at 50% 50%, rgba(242, 226, 26, 0.25), transparent 36%),
+        rgba(3, 18, 9, 0.78);
+}
+
+.nr-storm-cloud {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: #fff;
+    filter:
+        drop-shadow(0 0 22px rgba(255, 255, 255, 0.65))
+        drop-shadow(0 0 56px rgba(205, 230, 255, 0.45));
+    transform-style: preserve-3d;
+}
+
+.nr-storm-cloud-left { transform-origin: left center; }
+.nr-storm-cloud-right { transform-origin: right center; }
+
+.nr-storm-whiteout {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 50% 48%, #fff 0%, rgba(255, 255, 255, 0.97) 42%, rgba(247, 251, 255, 0.92) 100%);
+}
+
+.nr-storm-bolt {
+    position: absolute;
+    z-index: 3;
+    top: 30%;
+    left: calc(50% - clamp(27px, 4vw, 55px));
+    width: clamp(54px, 8vw, 110px);
+    height: 36%;
+    overflow: visible;
+    fill: #fffbd0;
+    filter: drop-shadow(0 0 14px #fff) drop-shadow(0 0 32px rgba(255, 255, 255, 0.9));
+}
+
+.nr-storm-bolt path { stroke: #fff; stroke-width: 2; }
+
+.nr-storm-flash {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 50% 52%, rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.25) 30%, transparent 68%);
+    mix-blend-mode: screen;
+}
+
 .nr-flash {
     position: fixed;
     inset: 0;
@@ -78,21 +267,13 @@
     background: radial-gradient(circle at 50% 30%, #fffbd0, rgba(242, 226, 26, 0.5) 45%, transparent 75%);
 }
 
-/* keyboard / screen-reader entry (Odin is also clickable in 3D) */
-.nr-sr-enter {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    z-index: 6;
-}
-
 @media (max-width: 600px) {
     .nr-bg-bolt { display: none; }
+    .nr-cta-stage { top: 46%; }
+    .nr-continue { width: min(260px, 76vw); min-height: 78px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .nr-rays, .nr-bg-bolt { animation: none !important; }
+    .nr-continue-cloud, .nr-continue-bolt { animation: none !important; }
 }

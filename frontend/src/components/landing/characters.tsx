@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject, type ReactNode } from "react";
 import { useFrame, useLoader } from "@react-three/fiber";
 import {
     AdditiveBlending,
@@ -49,17 +49,19 @@ export const CHARACTERS: Character[] = [
     { key: "odin", name: "Odin", role: "The Allfather" },
 ];
 
-function useGlbAvailable(url: string): boolean {
-    const [ok, setOk] = useState(false);
+function useGlbAvailable(url: string): boolean | null {
+    const [ok, setOk] = useState<boolean | null>(null);
     useEffect(() => {
         let alive = true;
         fetch(url, { method: "HEAD" })
             .then((r) => {
                 const type = r.headers.get("content-type") || "";
                 // vite returns index.html for missing files, so reject html
-                if (alive && r.ok && !type.includes("text/html")) setOk(true);
+                if (alive) setOk(r.ok && !type.includes("text/html"));
             })
-            .catch(() => undefined);
+            .catch(() => {
+                if (alive) setOk(false);
+            });
         return () => {
             alive = false;
         };
@@ -68,7 +70,7 @@ function useGlbAvailable(url: string): boolean {
 }
 
 /* ---------- real GLB model with its own animation clips ---------- */
-function GlbModel({ cfg, kind, director }: { cfg: ModelCfg; kind: Kind; director: DirRef }) {
+function GlbModel({ cfg, kind, director, onReady }: { cfg: ModelCfg; kind: Kind; director: DirRef; onReady: () => void }) {
     const gltf = useLoader(GLTFLoader, cfg.url);
     const rig = useMemo(() => {
         const scene = gltf.scene;
@@ -98,6 +100,10 @@ function GlbModel({ cfg, kind, director }: { cfg: ModelCfg; kind: Kind; director
         rig.mixer.stopAllAction();
     }, [rig]);
 
+    useEffect(() => {
+        onReady();
+    }, [onReady]);
+
     useFrame((_, dt) => {
         const names = Object.keys(rig.actions);
         if (!names.length) return;
@@ -119,6 +125,13 @@ function GlbModel({ cfg, kind, director }: { cfg: ModelCfg; kind: Kind; director
     });
 
     return <primitive object={rig.holder} />;
+}
+
+function ReadyModelFallback({ children, onReady }: { children: ReactNode; onReady: () => void }) {
+    useEffect(() => {
+        onReady();
+    }, [onReady]);
+    return <>{children}</>;
 }
 
 /* ---------- procedural 3D humanoid (used when no GLB exists) ---------- */
@@ -554,6 +567,7 @@ export type ActorProps = {
     scale?: number;
     overshoot?: boolean;
     handRef?: MutableRefObject<Object3D | null>;
+    onReady?: () => void;
     onClick?: () => void;
 };
 
@@ -562,6 +576,7 @@ export function Actor(p: ActorProps) {
     const modelRotation = useRef<Group>(null);
     const drag = useRef<{ pointerId: number | null; startX: number; lastX: number; moved: boolean } | null>(null);
     const manualYaw = useRef(FACE);
+    const ready = useRef(false);
     const cfg = MODEL_FILES[p.kind];
     const hasGlb = useGlbAvailable(cfg.url);
     const name = CHARACTERS.find((character) => character.key === p.kind)?.name ?? p.kind;
@@ -603,7 +618,16 @@ export function Actor(p: ActorProps) {
         return new CanvasTexture(canvas);
     }, [name]);
 
+    const markReady = useCallback(() => {
+        if (ready.current) return;
+        ready.current = true;
+        p.onReady?.();
+    }, [p.onReady]);
+
     useEffect(() => () => nameTexture.dispose(), [nameTexture]);
+    useEffect(() => {
+        if (hasGlb === false) markReady();
+    }, [hasGlb, markReady]);
 
     useFrame(() => {
         const g = root.current;
@@ -688,10 +712,10 @@ export function Actor(p: ActorProps) {
             }}
         >
             <group ref={modelRotation} rotation={[0, FACE, 0]}>
-                {hasGlb ? (
-                    <Boundary fallback={human}>
+                {hasGlb === null ? null : hasGlb ? (
+                    <Boundary fallback={<ReadyModelFallback onReady={markReady}>{human}</ReadyModelFallback>}>
                         <Suspense fallback={null}>
-                            <GlbModel cfg={cfg} kind={p.kind} director={p.director} />
+                            <GlbModel cfg={cfg} kind={p.kind} director={p.director} onReady={markReady} />
                         </Suspense>
                     </Boundary>
                 ) : (
