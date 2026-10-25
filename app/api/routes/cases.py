@@ -1,6 +1,7 @@
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Depends
-from app.models.case import CaseFile, CaseCreateRequest, CaseRunRequest
+from datetime import date
+from app.models.case import CaseFile, CaseCreateRequest, CaseRunRequest, VerificationStatus
 from app.evidence.graph import EvidenceGraph
 from app.services.container import get_container, Container
 from app.services.case_service import CaseService
@@ -22,6 +23,18 @@ async def create_case(
     service = CaseService(container)
     if background:
         case_id = str(uuid.uuid4())
+        # Save initial intake record so GET /cases/{case_id} succeeds immediately
+        initial_case = CaseFile(
+            case_id=case_id,
+            question=req.question,
+            as_of_date=req.as_of_date or date(2027, 1, 25),
+            pack_id=req.pack_id,
+            verification_status=VerificationStatus.INSUFFICIENT,
+            verification_summary="Case intake initiated. Multi-agent courtroom trial running."
+        )
+        if container.case_repo:
+            await container.case_repo.save_case(initial_case)
+
         asyncio.create_task(
             container.trial_engine.execute_trial(
                 question=req.question,

@@ -25,21 +25,22 @@ class Settings(BaseSettings):
     FIREBASE_STORAGE_BUCKET: str = ""
 
     # LLM Models & Providers
-    LLM_PROVIDER: str = "fallback"  # anthropic, gemini, groq, openai, fallback
-    LLM_MODEL: str = "gpt-4.1-mini"
+    LLM_PROVIDER: str = "anthropic"  # primary: anthropic (fallback: groq, openai, gemini)
+    LLM_MODEL: str = "claude-3-5-sonnet-latest"
     LLM_BASE_URL: str = "https://api.openai.com/v1"
     LLM_API_KEY: str = ""
     LLM_MAX_OUTPUT_TOKENS: int = 6000
     LLM_ATTEMPTS_PER_PROVIDER: int = 2
 
-    GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
+    ANTHROPIC_API_KEY: str = ""
+    ANTHROPIC_API_KEY1: str = ""
+    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-latest"
 
     GROQ_API_KEY: str = ""
     GROQ_MODEL: str = "openai/gpt-oss-120b"
 
-    ANTHROPIC_API_KEY: str = ""
-    ANTHROPIC_MODEL: str = "claude-3-5-sonnet-latest"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
 
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-4.1-mini"

@@ -21,13 +21,37 @@ class ProviderFailure(RuntimeError): pass
 class AnthropicProvider(LLMProvider):
     def __init__(self):
         from anthropic import AsyncAnthropic
-        self.model=os.getenv("ANTHROPIC_MODEL","claude-sonnet-4-5")
-        self.client=AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    async def structured(self, *, system:str, user:str, schema:type[BaseModel])->BaseModel:
-        r=await self.client.messages.create(model=self.model,max_tokens=int(os.getenv("LLM_MAX_OUTPUT_TOKENS","6000")),system=system,messages=[{"role":"user","content":user}],output_config={"format":{"type":"json_schema","schema":schema.model_json_schema()}})
-        text=next((b.text for b in r.content if getattr(b,"type",None)=="text"),None)
-        if not text: raise ProviderFailure("Anthropic returned no text block")
-        return schema.model_validate_json(text)
+        self.model = os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-latest")
+        self.clients = []
+        for name, env_var in [("ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"), ("ANTHROPIC_API_KEY1", "ANTHROPIC_API_KEY1")]:
+            k = os.getenv(env_var)
+            if k and k.strip():
+                self.clients.append((name, AsyncAnthropic(api_key=k.strip())))
+
+    async def structured(self, *, system: str, user: str, schema: type[BaseModel]) -> BaseModel:
+        tools = [{"name": "submit_structured_output", "description": "Submit structured output", "input_schema": schema.model_json_schema()}]
+        last_exc = None
+        for key_name, client in self.clients:
+            try:
+                r = await client.messages.create(
+                    model=self.model,
+                    max_tokens=int(os.getenv("LLM_MAX_OUTPUT_TOKENS", "6000")),
+                    system=system,
+                    messages=[{"role": "user", "content": user}],
+                    tools=tools,
+                    tool_choice={"type": "tool", "name": "submit_structured_output"}
+                )
+                for block in r.content:
+                    if getattr(block, "type", None) == "tool_use" and getattr(block, "name", None) == "submit_structured_output":
+                        return schema.model_validate(block.input)
+                for block in r.content:
+                    if getattr(block, "type", None) == "text" and block.text:
+                        return schema.model_validate_json(block.text)
+            except Exception as e:
+                last_exc = e
+                log.warning("Anthropic key %s failed: %s; trying next key fallback", key_name, e)
+                continue
+        raise ProviderFailure(f"All Anthropic keys failed: {last_exc}")
 
 class GeminiProvider(LLMProvider):
     def __init__(self):
@@ -37,7 +61,7 @@ class GeminiProvider(LLMProvider):
     async def structured(self, *, system:str, user:str, schema:type[BaseModel])->BaseModel:
         from google.genai import types
         def call():
-            return self.client.models.generate_content(model=self.model,contents=user,config=types.GenerateContentConfig(system_instruction=system,response_mime_type="application/json",response_schema=schema,temperature=0.1))
+            return self.client.models.generate_content(model=self.model,contents=user,config=types.GenerateContentConfig(system_instruction=system,response_mime_type="application/json",response_schema=schema))
         r=await asyncio.to_thread(call)
         if getattr(r,"parsed",None) is not None:
             return r.parsed if isinstance(r.parsed,schema) else schema.model_validate(r.parsed)
@@ -49,7 +73,7 @@ class GroqProvider(LLMProvider):
         self.model=os.getenv("GROQ_MODEL","openai/gpt-oss-20b")
         self.client=AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
     async def structured(self, *, system:str, user:str, schema:type[BaseModel])->BaseModel:
-        r=await self.client.chat.completions.create(model=self.model,messages=[{"role":"system","content":system},{"role":"user","content":user}],response_format={"type":"json_schema","json_schema":{"name":schema.__name__,"strict":False,"schema":schema.model_json_schema()}},temperature=0.1)
+        r=await self.client.chat.completions.create(model=self.model,messages=[{"role":"system","content":system},{"role":"user","content":user}],response_format={"type":"json_schema","json_schema":{"name":schema.__name__,"strict":False,"schema":schema.model_json_schema()}})
         content=r.choices[0].message.content
         if not content: raise ProviderFailure("Groq returned empty content")
         return schema.model_validate_json(content)

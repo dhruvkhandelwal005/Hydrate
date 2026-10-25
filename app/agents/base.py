@@ -25,23 +25,86 @@ class LLMProvider(ABC):
     async def structured(self, *, system: str, user: str, schema: type[T]) -> T: ...
 
 class AnthropicProvider(LLMProvider):
-    def __init__(self, api_key: str, model: str = "claude-3-5-sonnet-latest"):
+    def __init__(self, api_keys: list[tuple[str, str]] | list[str] | str, model: str = "claude-3-5-sonnet-latest"):
         from anthropic import AsyncAnthropic
-        self.client = AsyncAnthropic(api_key=api_key)
+        # Normalize into list of (key_name, client)
+        self.key_clients: list[tuple[str, Any]] = []
+        if isinstance(api_keys, str):
+            if api_keys.strip():
+                self.key_clients.append(("ANTHROPIC_API_KEY", AsyncAnthropic(api_key=api_keys.strip())))
+        elif isinstance(api_keys, list):
+            for item in api_keys:
+                if isinstance(item, tuple):
+                    name, key = item
+                    if key and key.strip():
+                        self.key_clients.append((name, AsyncAnthropic(api_key=key.strip())))
+                elif isinstance(item, str) and item.strip():
+                    idx = len(self.key_clients) + 1
+                    self.key_clients.append((f"ANTHROPIC_API_KEY_{idx}", AsyncAnthropic(api_key=item.strip())))
+
         self.model = model
+        self.fallback_models = [
+            "claude-3-5-sonnet-latest",
+            "claude-3-5-sonnet-20241022",
+            "claude-3-7-sonnet-latest",
+            "claude-3-5-haiku-latest",
+            "claude-3-5-haiku-20241022",
+            "claude-3-haiku-20240307"
+        ]
 
     async def structured(self, *, system: str, user: str, schema: type[T]) -> T:
-        r = await self.client.messages.create(
-            model=self.model,
-            max_tokens=settings.LLM_MAX_OUTPUT_TOKENS,
-            system=system,
-            messages=[{"role": "user", "content": user}],
-            output_config={"format": {"type": "json_schema", "schema": schema.model_json_schema()}}
-        )
-        text = next((b.text for b in r.content if getattr(b, "type", None) == "text"), None)
-        if not text:
-            raise RuntimeError("Anthropic returned empty content")
-        return schema.model_validate_json(text)
+        schema_dict = schema.model_json_schema()
+        if "type" not in schema_dict:
+            schema_dict["type"] = "object"
+
+        tools = [
+            {
+                "name": "submit_structured_response",
+                "description": f"Submit structured JSON matching schema for {schema.__name__}",
+                "input_schema": schema_dict
+            }
+        ]
+
+        seen = set()
+        models_to_try = []
+        for m in [self.model] + self.fallback_models:
+            if m and m not in seen:
+                seen.add(m)
+                models_to_try.append(m)
+
+        last_exc = None
+        # Fallback hierarchy: Try ANTHROPIC_API_KEY first; if it fails, try ANTHROPIC_API_KEY1
+        for key_name, client in self.key_clients:
+            for m in models_to_try:
+                try:
+                    # 1. Try Forced Tool Calling (Universal across all Anthropic models)
+                    r = await client.messages.create(
+                        model=m,
+                        max_tokens=settings.LLM_MAX_OUTPUT_TOKENS,
+                        system=system,
+                        messages=[{"role": "user", "content": user}],
+                        tools=tools,
+                        tool_choice={"type": "tool", "name": "submit_structured_response"}
+                    )
+                    for block in r.content:
+                        if getattr(block, "type", None) == "tool_use" and getattr(block, "name", None) == "submit_structured_response":
+                            return schema.model_validate(block.input)
+
+                    # 2. Text block fallback
+                    for block in r.content:
+                        if getattr(block, "type", None) == "text" and block.text:
+                            raw = block.text.strip()
+                            if raw.startswith("```json"):
+                                raw = raw.split("```json", 1)[1].split("```", 1)[0].strip()
+                            elif raw.startswith("```"):
+                                raw = raw.split("```", 1)[1].split("```", 1)[0].strip()
+                            return schema.model_validate_json(raw)
+                except Exception as e:
+                    last_exc = e
+                    log.warning("Anthropic with key %s and model %s failed: %s; trying next model/key fallback", key_name, m, e)
+                    continue
+
+        raise RuntimeError(f"All Anthropic keys and models failed: {last_exc}")
 
 class GeminiProvider(LLMProvider):
     def __init__(self, api_key: str, model: str = "gemini-3.5-flash-lite"):
@@ -65,7 +128,7 @@ class GeminiProvider(LLMProvider):
                         config=types.GenerateContentConfig(
                             system_instruction=system,
                             response_mime_type="application/json",
-                            temperature=0.1
+                            
                         )
                     )
                 r = await asyncio.to_thread(_call)
@@ -103,7 +166,7 @@ class GroqProvider(LLMProvider):
                     ],
                     response_format={"type": "json_object"},
                     max_tokens=800,
-                    temperature=0.1
+                
                 )
                 content = r.choices[0].message.content
                 if not content:
@@ -155,12 +218,19 @@ class FallbackLLMProvider(LLMProvider):
 def get_llm_provider() -> LLMProvider:
     candidates: list[tuple[str, LLMProvider]] = []
 
-    # Priority 1: Gemini (high token limit and fast structured JSON generation)
-    if settings.GEMINI_API_KEY:
+    # Priority 1: Anthropic with dual-key fallback (ANTHROPIC_API_KEY -> ANTHROPIC_API_KEY1)
+    anthropic_keys: list[tuple[str, str]] = []
+    if settings.ANTHROPIC_API_KEY:
+        anthropic_keys.append(("ANTHROPIC_API_KEY", settings.ANTHROPIC_API_KEY))
+    if settings.ANTHROPIC_API_KEY1:
+        anthropic_keys.append(("ANTHROPIC_API_KEY1", settings.ANTHROPIC_API_KEY1))
+
+    if anthropic_keys:
         try:
-            candidates.append(("gemini", GeminiProvider(api_key=settings.GEMINI_API_KEY, model=settings.GEMINI_MODEL)))
+            candidates.append(("anthropic", AnthropicProvider(api_keys=anthropic_keys, model=settings.ANTHROPIC_MODEL)))
+            log.info("Registered primary LLM provider: Anthropic (%s) with fallbacks %s", settings.ANTHROPIC_MODEL, [k[0] for k in anthropic_keys])
         except Exception as e:
-            log.warning("Could not init Gemini: %s", e)
+            log.warning("Could not init Anthropic: %s", e)
 
     # Priority 2: Groq with robust multi-model fallback
     if settings.GROQ_API_KEY:
@@ -169,14 +239,7 @@ def get_llm_provider() -> LLMProvider:
         except Exception as e:
             log.warning("Could not init Groq: %s", e)
 
-    # Priority 3: Anthropic
-    if settings.ANTHROPIC_API_KEY:
-        try:
-            candidates.append(("anthropic", AnthropicProvider(api_key=settings.ANTHROPIC_API_KEY, model=settings.ANTHROPIC_MODEL)))
-        except Exception as e:
-            log.warning("Could not init Anthropic: %s", e)
-
-    # Priority 4: OpenAI
+    # Priority 3: OpenAI
     if settings.OPENAI_API_KEY or settings.LLM_API_KEY:
         try:
             candidates.append(("openai", OpenAIProvider(
@@ -186,6 +249,13 @@ def get_llm_provider() -> LLMProvider:
             )))
         except Exception as e:
             log.warning("Could not init OpenAI: %s", e)
+
+    # Priority 4: Gemini (relegated to lowest-tier fallback)
+    if settings.GEMINI_API_KEY:
+        try:
+            candidates.append(("gemini", GeminiProvider(api_key=settings.GEMINI_API_KEY, model=settings.GEMINI_MODEL)))
+        except Exception as e:
+            log.warning("Could not init Gemini: %s", e)
 
     if not candidates:
         raise RuntimeError("No valid LLM provider credentials found in environment!")
