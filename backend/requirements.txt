@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+pydantic
+python-dotenv
+langgraph
+python-docx
+pypdf
+rank-bm25
+sentence-transformers
+pytest

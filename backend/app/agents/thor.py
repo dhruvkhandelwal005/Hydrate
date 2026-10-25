@@ -1,0 +1,1 @@
+"""Thor agent role placeholder."""

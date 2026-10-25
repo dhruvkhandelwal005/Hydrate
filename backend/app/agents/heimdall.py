@@ -1,0 +1,1 @@
+"""Heimdall agent role placeholder."""
