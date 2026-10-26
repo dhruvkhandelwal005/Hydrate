@@ -22,9 +22,10 @@ class LineageStep(BaseModel):
     timestamp: str
 
 class Claim(BaseModel):
-    model_config = ConfigDict(extra="ignore")
+    model_config = ConfigDict(extra="allow")
     claim_id: str
     agent: Literal["thor", "loki"]
+    run_id: str | None = None
     country: str
     sector: str
     claim: str
@@ -41,3 +42,14 @@ class Claim(BaseModel):
     version: int = 1
     lineage: list[LineageStep] = Field(default_factory=list)
     concession_reason: str | None = None
+
+    # Frontend contract fields
+    title: str | None = None
+    text: str | None = None
+    estimate_low: float | None = None
+    estimate_high: float | None = None
+    period: str | None = None
+    citations: list[dict[str, Any]] = Field(default_factory=list)
+    calculation: dict[str, Any] | None = None
+    attack: dict[str, Any] | None = None
+    rebuttal: dict[str, Any] | None = None

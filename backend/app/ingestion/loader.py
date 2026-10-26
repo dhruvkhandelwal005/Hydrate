@@ -1,6 +1,7 @@
 from __future__ import annotations
 import json
 import logging
+import shutil
 import zipfile
 from pathlib import Path
 from typing import Any
@@ -41,12 +42,19 @@ class PackLoader:
             raise FileNotFoundError(f"Pack path does not exist: {source_path}")
 
         extracted_dir: Path | None = None
-        if source_path.is_file() and source_path.suffix.lower() == ".zip":
-            extracted_dir = source_path.parent / f"_extracted_{source_path.stem}"
-            extracted_dir.mkdir(parents=True, exist_ok=True)
-            with zipfile.ZipFile(source_path, "r") as z:
-                z.extractall(extracted_dir)
-            work_dir = extracted_dir
+        if source_path.is_file():
+            if source_path.suffix.lower() == ".zip":
+                extracted_dir = source_path.parent / f"_extracted_{source_path.stem}"
+                extracted_dir.mkdir(parents=True, exist_ok=True)
+                with zipfile.ZipFile(source_path, "r") as z:
+                    z.extractall(extracted_dir)
+                work_dir = extracted_dir
+            else:
+                doc_dir = source_path.parent / f"_single_doc_{source_path.stem}"
+                doc_dir.mkdir(parents=True, exist_ok=True)
+                target_copy = doc_dir / source_path.name
+                shutil.copy2(source_path, target_copy)
+                work_dir = doc_dir
         else:
             work_dir = source_path
 

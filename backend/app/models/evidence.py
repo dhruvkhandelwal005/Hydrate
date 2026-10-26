@@ -34,6 +34,9 @@ class EvidenceRef(BaseModel):
     snippet: str = ""
     relation: Literal["SUPPORTS", "CONTRADICTS", "CORRECTS", "RETRACTS", "BACKGROUND", "UNCLEAR"] = "UNCLEAR"
     admissible: bool = True
+    composite_score: float | None = None
+    tier_weight: float = 0.70
+    recency_weight: float = 0.30
     warnings: list[str] = Field(default_factory=list)
 
 class ContradictionItem(BaseModel):

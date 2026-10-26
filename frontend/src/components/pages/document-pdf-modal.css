@@ -1,0 +1,544 @@
+/* ==========================================================================
+   Nine Realms — Authentic Document PDF Viewer Modal Styles
+   ========================================================================== */
+
+.rg-pdf-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(10px);
+    animation: rgPdfFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes rgPdfFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.rg-pdf-viewer-window {
+    display: flex;
+    flex-direction: column;
+    width: min(1000px, 95vw);
+    height: min(90vh, 920px);
+    background: #1b241e;
+    border: 1px solid rgba(216, 222, 74, 0.4);
+    border-radius: 12px;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8), 0 0 40px rgba(216, 222, 74, 0.15);
+    overflow: hidden;
+    animation: rgPdfScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes rgPdfScaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+/* Toolbar */
+.rg-pdf-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 16px;
+    background: #0d1a12;
+    border-bottom: 1px solid rgba(155, 176, 143, 0.25);
+    color: #edf5e8;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.rg-pdf-doc-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.rg-pdf-icon {
+    font-size: 20px;
+}
+
+.rg-pdf-meta-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.rg-pdf-filename {
+    font-weight: 700;
+    font-size: 13px;
+    color: #edf5e8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.rg-pdf-docid-badge {
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(216, 222, 74, 0.16);
+    border: 1px solid rgba(216, 222, 74, 0.4);
+    color: var(--rg-gold, #d8de4a);
+    font-size: 11px;
+    font-weight: 700;
+    font-family: ui-monospace, "Cascadia Code", monospace;
+    white-space: nowrap;
+}
+
+.rg-pdf-verified-badge {
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(154, 255, 195, 0.12);
+    border: 1px solid rgba(154, 255, 195, 0.3);
+    color: #9affc3;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Page & Zoom Nav */
+.rg-pdf-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.rg-pdf-page-nav,
+.rg-pdf-zoom-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(155, 176, 143, 0.18);
+}
+
+.rg-pdf-tool-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #edf5e8;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.rg-pdf-tool-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.rg-pdf-tool-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.rg-pdf-page-indicator {
+    font-size: 12px;
+    color: #9bb08f;
+    min-width: 80px;
+    text-align: center;
+}
+
+.rg-pdf-page-indicator strong {
+    color: #edf5e8;
+}
+
+.rg-pdf-zoom-level {
+    font-size: 11px;
+    color: #9bb08f;
+    min-width: 42px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Actions */
+.rg-pdf-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rg-pdf-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(155, 176, 143, 0.25);
+    background: rgba(255, 255, 255, 0.06);
+    color: #edf5e8;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.rg-pdf-action-btn:hover {
+    background: rgba(216, 222, 74, 0.15);
+    border-color: rgba(216, 222, 74, 0.4);
+    color: var(--rg-gold, #d8de4a);
+}
+
+/* Prominent Close Button with Cross Sign (×) */
+.rg-pdf-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border: 1px solid rgba(255, 100, 100, 0.4);
+    border-radius: 6px;
+    background: rgba(255, 60, 60, 0.15);
+    color: #ff9d9d;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    margin-left: 4px;
+}
+
+.rg-pdf-close-btn:hover {
+    background: rgba(255, 60, 60, 0.35);
+    border-color: #ff6060;
+    color: #ffffff;
+    transform: scale(1.08);
+    box-shadow: 0 0 14px rgba(255, 60, 60, 0.4);
+}
+
+/* Body Viewport */
+.rg-pdf-body-viewport {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 28px 20px;
+    background: #141f17;
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
+/* Rendered Paper Sheet (Authentic Document) */
+.rg-pdf-paper-sheet {
+    position: relative;
+    width: 780px;
+    min-height: 980px;
+    padding: 48px 56px;
+    background: #fcfbf7;
+    color: #1a221d;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 2px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+    transition: transform 0.15s ease-out;
+}
+
+/* Security Watermark */
+.rg-pdf-watermark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    font-weight: 900;
+    color: rgba(0, 0, 0, 0.035);
+    transform: rotate(-30deg);
+    pointer-events: none;
+    letter-spacing: 0.15em;
+    user-select: none;
+    text-align: center;
+    z-index: 1;
+}
+
+/* Letterhead Header */
+.rg-pdf-letterhead {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 2px solid #2d3b32;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.rg-pdf-crest {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.crest-rune {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: #1e3325;
+    color: #d8de4a;
+    font-size: 26px;
+    font-weight: 700;
+    border-radius: 6px;
+}
+
+.crest-agency {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1e3325;
+}
+
+.crest-sub {
+    display: block;
+    font-size: 11px;
+    color: #5d6d62;
+    margin-top: 2px;
+}
+
+.rg-pdf-docket-stamp .stamp-box {
+    border: 2px solid #a83232;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-align: center;
+    transform: rotate(3deg);
+    background: rgba(168, 50, 50, 0.04);
+}
+
+.stamp-title {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    color: #a83232;
+}
+
+.stamp-id {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: #a83232;
+    font-family: monospace;
+}
+
+.stamp-date {
+    display: block;
+    font-size: 9px;
+    color: #a83232;
+}
+
+/* Document Title Header */
+.rg-pdf-doc-header {
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 2;
+}
+
+.rg-pdf-classification {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #8b2500;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.rg-pdf-main-title {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #0f1c14;
+    margin: 0 0 12px;
+}
+
+.rg-pdf-meta-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 11px;
+    color: #4a594f;
+    border-top: 1px dashed #c0ccc3;
+    border-bottom: 1px dashed #c0ccc3;
+    padding: 8px 0;
+}
+
+.rg-pdf-meta-bar code {
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    background: #e8eee9;
+    padding: 1px 4px;
+    border-radius: 2px;
+}
+
+.ref-mark {
+    background: #fff3c4;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    color: #6d4c00;
+}
+
+/* Content Sections */
+.rg-pdf-content {
+    position: relative;
+    z-index: 2;
+}
+
+.rg-pdf-section-page-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e3325;
+    border-bottom: 1px solid #d4dfd7;
+    padding-bottom: 6px;
+    margin: 0 0 16px;
+}
+
+.rg-pdf-section {
+    margin-bottom: 16px;
+}
+
+.rg-pdf-sec-heading {
+    font-size: 13px;
+    font-weight: 700;
+    color: #273e2f;
+    margin: 0 0 6px;
+}
+
+.rg-pdf-sec-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #2c3830;
+    margin: 0;
+}
+
+/* Yellow Highlighted Evidence Citation */
+.rg-pdf-section.highlighted-citation {
+    background: rgba(255, 238, 88, 0.28);
+    border-left: 4px solid #f9a825;
+    padding: 12px 16px;
+    border-radius: 0 6px 6px 0;
+    box-shadow: 0 2px 8px rgba(249, 168, 37, 0.1);
+}
+
+.rg-pdf-highlight-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #7f5500;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.rg-pdf-highlight-banner .banner-icon {
+    font-size: 12px;
+}
+
+/* Telemetry Table */
+.rg-pdf-table-wrap {
+    margin: 18px 0;
+    overflow-x: auto;
+}
+
+.rg-pdf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    text-align: left;
+}
+
+.rg-pdf-table th {
+    background: #e2ebe4;
+    border: 1px solid #c2d0c6;
+    padding: 8px 10px;
+    font-weight: 700;
+    color: #1a2a1f;
+}
+
+.rg-pdf-table td {
+    border: 1px solid #d8e2db;
+    padding: 7px 10px;
+    color: #2b3930;
+}
+
+.rg-pdf-table tr:nth-child(even) td {
+    background: #f5f8f6;
+}
+
+.rg-pdf-table tr.highlighted-row td {
+    background: rgba(255, 238, 88, 0.45);
+    font-weight: 700;
+    color: #4a3600;
+    border-color: #e6b800;
+}
+
+/* Footer of Sheet */
+.rg-pdf-sheet-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 1px solid #c8d4cc;
+    font-size: 10px;
+    color: #647569;
+    position: relative;
+    z-index: 2;
+}
+
+.rg-pdf-seal-badge {
+    display: block;
+    font-weight: 700;
+    color: #1e3325;
+    margin-bottom: 2px;
+}
+
+.rg-pdf-sig-hash {
+    display: block;
+    font-family: ui-monospace, monospace;
+    font-size: 9px;
+    color: #7b8f80;
+}
+
+.rg-pdf-footer-right {
+    text-align: right;
+}
+
+.rg-pdf-barcode {
+    display: block;
+    font-family: monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+    font-weight: 900;
+    color: #1e3325;
+    margin-top: 2px;
+}

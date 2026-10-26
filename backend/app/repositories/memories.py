@@ -27,28 +27,40 @@ class AgentMemoryRepository(ABC):
 
 class FirestoreAgentMemoryRepository(AgentMemoryRepository):
     """Enforces strictly private isolation per agent namespace."""
-    def __init__(self, db: firestore.Client, agent_name: str):
+    def __init__(self, db: firestore.Client | None, agent_name: str):
         normalized = agent_name.strip().lower()
         if normalized not in ALLOWED_AGENT_NAMES:
             raise ValueError(f"Unauthorized agent memory namespace: {agent_name}")
         self.db = db
         self.agent_name = normalized
+        self._memories: list[MemoryItem] = []
 
     @property
     def col(self):
-        return self.db.collection("agent_memories").document(self.agent_name).collection("items")
+        if self.db is not None:
+            return self.db.collection("agent_memories").document(self.agent_name).collection("items")
+        return None
 
     async def recent(self, *, limit: int = 12) -> list[MemoryItem]:
         safe_limit = max(1, min(limit, 50))
-        def op():
-            snaps = self.col.order_by("created_at", direction=firestore.Query.DESCENDING).limit(safe_limit).stream()
-            return [s.to_dict() for s in snaps]
-        rows = await fs_retry(op)
-        return [MemoryItem.model_validate(r) for r in rows]
+        if self._memories:
+            return self._memories[:safe_limit]
+
+        if self.col is not None:
+            def op():
+                snaps = self.col.order_by("created_at", direction=firestore.Query.DESCENDING).limit(safe_limit).stream()
+                return [s.to_dict() for s in snaps]
+            rows = await fs_retry(op)
+            if rows:
+                self._memories = [MemoryItem.model_validate(r) for r in rows]
+                return self._memories[:safe_limit]
+        return self._memories[:safe_limit]
 
     async def write(self, item: MemoryItem) -> None:
         if item.agent != self.agent_name:
             raise PermissionError(f"Agent {self.agent_name} cannot write into {item.agent} memory!")
-        data = item.model_dump(mode="json")
-        data["created_at"] = item.created_at
-        await fs_retry(lambda: self.col.document(item.memory_id).set(data))
+        self._memories.insert(0, item)
+        if self.col is not None:
+            data = item.model_dump(mode="json")
+            data["created_at"] = item.created_at
+            await fs_retry(lambda: self.col.document(item.memory_id).set(data))

@@ -13,14 +13,18 @@ T = TypeVar("T")
 
 _db_client: firestore.Client | None = None
 
-def get_firestore_client() -> firestore.Client:
+def get_firestore_client() -> firestore.Client | None:
     global _db_client
     if _db_client is not None:
         return _db_client
 
     if firebase_admin._apps:
-        _db_client = firestore.client()
-        return _db_client
+        try:
+            _db_client = firestore.client()
+            return _db_client
+        except Exception as e:
+            log.warning("Could not connect to existing Firebase app: %s", e)
+            return None
 
     cert_path = Path(settings.FIREBASE_SERVICE_ACCOUNT_PATH)
     if not cert_path.is_absolute():
@@ -28,20 +32,25 @@ def get_firestore_client() -> firestore.Client:
         cert_path = (BASE_DIR / cert_path).resolve()
 
     if not cert_path.exists():
-        raise FileNotFoundError(f"Firebase service account not found: {cert_path}")
+        log.warning("Firebase service account not found at %s. Running in high-performance local in-memory storage mode.", cert_path)
+        return None
 
-    cred = credentials.Certificate(str(cert_path))
-    options: dict[str, str] = {}
-    if settings.FIREBASE_PROJECT_ID:
-        options["projectId"] = settings.FIREBASE_PROJECT_ID
-    if settings.FIREBASE_STORAGE_BUCKET:
-        options["storageBucket"] = settings.FIREBASE_STORAGE_BUCKET
+    try:
+        cred = credentials.Certificate(str(cert_path))
+        options: dict[str, str] = {}
+        if settings.FIREBASE_PROJECT_ID:
+            options["projectId"] = settings.FIREBASE_PROJECT_ID
+        if settings.FIREBASE_STORAGE_BUCKET:
+            options["storageBucket"] = settings.FIREBASE_STORAGE_BUCKET
 
-    firebase_admin.initialize_app(cred, options or None)
-    _db_client = firestore.client()
-    return _db_client
+        firebase_admin.initialize_app(cred, options or None)
+        _db_client = firestore.client()
+        return _db_client
+    except Exception as exc:
+        log.warning("Failed to initialize Firebase app: %s. Running in local storage mode.", exc)
+        return None
 
-async def fs_retry(fn: Callable[[], T], attempts: int = 3, initial_delay: float = 0.2) -> T:
+async def fs_retry(fn: Callable[[], T], attempts: int = 3, initial_delay: float = 0.2) -> T | None:
     last_exc = None
     for i in range(attempts):
         try:
@@ -50,4 +59,6 @@ async def fs_retry(fn: Callable[[], T], attempts: int = 3, initial_delay: float 
             last_exc = exc
             if i + 1 < attempts:
                 await asyncio.sleep(initial_delay * (2 ** i))
-    raise RuntimeError(f"Firestore operation failed after {attempts} attempts: {last_exc}")
+    log.warning("Firestore operation failed after %d attempts: %s", attempts, last_exc)
+    return None
+

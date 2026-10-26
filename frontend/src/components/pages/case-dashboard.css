@@ -1,0 +1,536 @@
+.rg-dashboard {
+    display: grid;
+    gap: 20px;
+    margin-top: 32px;
+}
+
+.rg-dashboard-heading,
+.rg-dashboard-panel-head,
+.rg-source-dialog-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.rg-dashboard-heading {
+    padding: 0 2px;
+}
+
+.rg-dashboard-heading h2,
+.rg-dashboard-panel h3,
+.rg-source-dialog h3 {
+    margin: 2px 0 0;
+    color: var(--rg-text);
+    font-family: "Cinzel Decorative", serif;
+    font-size: 21px;
+    line-height: 1.35;
+}
+
+.rg-dashboard-kicker {
+    color: var(--rg-gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+}
+
+.rg-dashboard-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 11px;
+    border: 1px solid var(--rg-warn);
+    border-radius: 999px;
+    color: var(--rg-warn);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+.rg-dashboard-status i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.rg-dashboard-status.complete {
+    border-color: var(--rg-ok);
+    color: var(--rg-ok);
+}
+
+.rg-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.82fr) minmax(0, 1.55fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.rg-dashboard-panel {
+    min-width: 0;
+    padding: 20px;
+    border: 1px solid var(--rg-line);
+    border-radius: 10px;
+    background: rgba(14, 36, 24, 0.96);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.28);
+}
+
+.rg-dashboard-panel h3 {
+    font-family: "Alegreya Sans", system-ui, sans-serif;
+    font-size: 21px;
+}
+
+.rg-dashboard-note {
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+.rg-dashboard-empty {
+    margin: 18px 0 2px;
+    color: var(--rg-dim);
+    font-style: italic;
+}
+
+.rg-feed-count,
+.rg-dashboard-risk {
+    flex: 0 0 auto;
+    color: var(--rg-gold);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.rg-feed-list {
+    display: grid;
+    gap: 0;
+    max-height: 470px;
+    margin: 16px -4px 0 0;
+    padding: 0 6px 0 0;
+    overflow: auto;
+    list-style: none;
+}
+
+.rg-feed-item {
+    display: grid;
+    grid-template-columns: 84px auto minmax(0, 1fr);
+    gap: 8px;
+    align-items: start;
+    padding: 11px 0;
+    border-top: 1px solid rgba(155, 176, 143, 0.16);
+}
+
+.rg-feed-item time {
+    padding-top: 2px;
+    color: var(--rg-dim);
+    font-family: ui-monospace, "Cascadia Code", monospace;
+    font-size: 11px;
+}
+
+.rg-feed-tag {
+    display: inline-flex;
+    width: fit-content;
+    padding: 2px 6px;
+    border: 1px solid var(--rg-line);
+    border-radius: 4px;
+    color: var(--rg-dim);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.rg-feed-tag.tag-SEARCH,
+.rg-feed-tag.tag-FILTERS {
+    color: #8adaff;
+}
+
+.rg-feed-tag.tag-RETRIEVED,
+.rg-feed-tag.tag-CLAIM {
+    color: var(--rg-ok);
+}
+
+.rg-feed-tag.tag-ATTACK,
+.rg-feed-tag.tag-BLOCKED {
+    color: var(--rg-warn);
+}
+
+.rg-feed-tag.tag-RULING,
+.rg-feed-tag.tag-REBUTTAL,
+.rg-feed-tag.tag-CONCEDE {
+    color: #d2b9ff;
+}
+
+.rg-feed-item p {
+    margin: 0;
+    color: var(--rg-text);
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.rg-dashboard-citations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.rg-dashboard-citations button,
+.rg-dashboard-source-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--rg-gold);
+    font: inherit;
+    font-size: 12px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+}
+
+.rg-governance-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.rg-governance-grid article {
+    padding: 14px;
+    border: 1px solid var(--rg-line);
+    border-radius: 8px;
+    background: rgba(8, 24, 15, 0.88);
+}
+
+.rg-governance-state {
+    color: var(--rg-warn);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.rg-governance-grid h4 {
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.rg-governance-grid p {
+    margin: 0;
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+.rg-exposure-disclaimer {
+    margin: 12px 0;
+}
+
+.rg-dashboard-table-wrap {
+    max-width: 100%;
+    overflow: auto;
+}
+
+.rg-dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+}
+
+.rg-dashboard-table th,
+.rg-dashboard-table td {
+    padding: 9px 8px;
+    border-bottom: 1px solid rgba(155, 176, 143, 0.16);
+    vertical-align: top;
+}
+
+.rg-dashboard-table th {
+    color: var(--rg-dim);
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.rg-dashboard-table td:nth-child(4),
+.rg-dashboard-table td:nth-child(5) {
+    color: var(--rg-gold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.rg-dashboard-side {
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.rg-dashboard-side.thor {
+    color: #8adaff;
+}
+
+.rg-dashboard-side.loki {
+    color: #9affc3;
+}
+
+.rg-briefing-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.rg-dashboard-summary {
+    padding: 15px 17px;
+    border-left: 3px solid var(--rg-gold);
+    border-radius: 0 7px 7px 0;
+    background: rgba(216, 222, 74, 0.07);
+}
+
+.rg-dashboard-summary p {
+    margin: 5px 0 0;
+    color: var(--rg-text);
+}
+
+.rg-finding-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.rg-finding-group {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid var(--rg-line);
+    border-radius: 8px;
+    background: rgba(8, 24, 15, 0.88);
+}
+
+.rg-finding-group h4 {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 10px;
+    color: var(--rg-gold);
+    font-size: 16px;
+}
+
+.rg-finding-group h4 span {
+    display: grid;
+    min-width: 24px;
+    height: 24px;
+    place-items: center;
+    border: 1px solid var(--rg-line);
+    border-radius: 50%;
+    color: var(--rg-text);
+    font-size: 12px;
+}
+
+.rg-finding-group ul,
+.rg-outlook ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.rg-finding-group li {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(155, 176, 143, 0.14);
+}
+
+.rg-finding-group li strong {
+    font-size: 13px;
+}
+
+.rg-finding-group li p {
+    margin: 4px 0 0;
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+.rg-finding-group li .rg-dashboard-source-link {
+    flex: 0 0 auto;
+}
+
+.rg-outlook {
+    display: grid;
+    grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1.2fr);
+    gap: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rg-line);
+}
+
+.rg-outlook h4 {
+    margin: 4px 0;
+    font-size: 17px;
+}
+
+.rg-outlook p,
+.rg-outlook li {
+    margin: 0;
+    color: var(--rg-dim);
+    font-size: 14px;
+}
+
+.rg-outlook strong {
+    color: var(--rg-text);
+}
+
+.rg-dashboard-source-note {
+    padding-top: 12px;
+    border-top: 1px solid var(--rg-line);
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+.rg-dashboard-source-note strong {
+    color: var(--rg-text);
+}
+
+.rg-source-backdrop {
+    position: fixed;
+    z-index: 100;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(6px);
+}
+
+.rg-source-dialog {
+    width: min(620px, 100%);
+    max-height: min(80vh, 720px);
+    overflow: auto;
+    padding: 24px;
+    border: 1px solid var(--rg-gold-deep);
+    border-radius: 10px;
+    background: var(--rg-panel);
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+}
+
+.rg-source-close {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--rg-line);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--rg-text);
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.rg-source-name {
+    color: var(--rg-gold);
+    font-weight: 700;
+}
+
+.rg-source-meta {
+    display: grid;
+    grid-template-columns: 105px 1fr;
+    gap: 7px 12px;
+    padding: 13px;
+    border-radius: 7px;
+    background: rgba(8, 24, 15, 0.92);
+    font-size: 14px;
+}
+
+.rg-source-meta dt {
+    color: var(--rg-dim);
+}
+
+.rg-source-meta dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.rg-source-time {
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+.rg-source-file {
+    padding: 10px;
+    border: 1px solid var(--rg-line);
+    border-radius: 6px;
+    font-size: 13px;
+    overflow-wrap: anywhere;
+}
+
+.rg-source-trade-row {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: rgba(216, 222, 74, 0.15);
+    border: 1px solid rgba(216, 222, 74, 0.35);
+    color: var(--rg-gold);
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.rg-source-context {
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(14, 36, 24, 0.9);
+    border-left: 3px solid var(--rg-gold);
+    color: var(--rg-text);
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.rg-briefing-exposure-section {
+    margin: 24px 0 16px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(155, 176, 143, 0.2);
+}
+
+.rg-briefing-exposure-head h4 {
+    margin: 6px 0 4px;
+    font-size: 18px;
+    color: var(--rg-text);
+}
+
+.rg-briefing-exposure-head p {
+    margin: 0 0 14px;
+    color: var(--rg-dim);
+    font-size: 13px;
+}
+
+@media (max-width: 980px) {
+    .rg-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 680px) {
+    .rg-dashboard-panel {
+        padding: 15px;
+    }
+
+    .rg-dashboard-heading,
+    .rg-dashboard-panel-head {
+        align-items: flex-start;
+    }
+
+    .rg-dashboard-heading {
+        flex-direction: column;
+    }
+
+    .rg-finding-grid,
+    .rg-outlook {
+        grid-template-columns: 1fr;
+    }
+
+    .rg-governance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rg-feed-item {
+        grid-template-columns: 72px auto minmax(0, 1fr);
+        gap: 6px;
+    }
+}

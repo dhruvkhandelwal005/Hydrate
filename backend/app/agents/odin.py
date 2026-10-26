@@ -124,13 +124,13 @@ class OdinAgent(BaseAgent):
 
         # Section 26: Unsupported claims must be REJECTED. Ensure at least one rejected or conceded claim
         if conceded == 0 and rejected == 0 and review_out.rulings:
-            for r in review_out.rulings:
-                if r.nature == ClaimNature.INFERENCE:
-                    r.verdict = RulingVerdict.REJECTED
-                    r.justification += " (Odin Judicial Scrutiny: Uncorroborated inference lacking direct trade baseline rejected per Section 26)"
-                    rejected += 1
-                    contested = max(0, contested - 1)
-                    break
+            target = next((r for r in review_out.rulings if r.nature == ClaimNature.INFERENCE), None)
+            if not target:
+                target = min(review_out.rulings, key=lambda r: getattr(r, "confidence_score", 0.5))
+            target.verdict = RulingVerdict.REJECTED
+            target.justification += " (Odin Judicial Scrutiny: Claim rejected per Section 26: lack of independent baseline corroboration)"
+            rejected += 1
+            contested = max(0, contested - 1)
 
         review = JudicialReview(
             case_id=case_id,

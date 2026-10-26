@@ -32,9 +32,13 @@ class MultiTraceSink(TraceSink):
     def get_events(self, case_id: str) -> list[TraceEvent]:
         return list(self._history.get(case_id, []))
 
+    def clear_events(self, case_id: str) -> None:
+        self._history.pop(case_id, None)
+
     async def emit(self, event: TraceEvent) -> None:
         self._history.setdefault(event.case_id, []).append(event)
-        log_event(event.event_type, event.agent, case_id=event.case_id, run_id=event.run_id, **event.payload)
+        payload_kwargs = {k: v for k, v in event.payload.items() if k not in ("case_id", "run_id", "event_type", "agent")}
+        log_event(event.event_type, event.agent, case_id=event.case_id, run_id=event.run_id, **payload_kwargs)
 
         # Broadcast to active SSE listeners
         listeners = self._listeners.get(event.case_id, [])
