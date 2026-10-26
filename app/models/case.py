@@ -40,7 +40,7 @@ class CaseFile(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class CaseCreateRequest(BaseModel):
-    question: str = Field(min_length=5, max_length=5000)
+    question: str = Field(min_length=1, max_length=5000)
     pack_id: str = Field(default="dev_pack_E5")
     as_of_date: date | None = None
 

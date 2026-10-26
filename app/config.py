@@ -4,7 +4,10 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env", override=True)
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -37,7 +40,10 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = "claude-3-5-sonnet-latest"
 
     GROQ_API_KEY: str = ""
-    GROQ_MODEL: str = "openai/gpt-oss-120b"
+    GROQ_API_KEY1: str = ""
+    GROQ_API_KEY2: str = ""
+    GROQ_API_KEY3: str = ""
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
 
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.5-flash-lite"

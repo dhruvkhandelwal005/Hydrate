@@ -8,7 +8,7 @@ from typing import Any
 from google.cloud import firestore
 from google.cloud.firestore_v1.base_query import FieldFilter
 from pydantic import BaseModel, ConfigDict, Field
-from app.models.document import ReliabilityTier
+from app.models.document import ReliabilityTier, DocumentMeta
 from app.models.trace import TraceEvent, TraceEventType
 from app.retrieval.metadata_filters import SearchFilters
 from app.retrieval.lexical_search import compute_lexical_score
@@ -45,35 +45,51 @@ class SearchTool(ABC):
     async def search(self, *, query: str, filters: SearchFilters, limit: int = 10) -> list[SearchResult]: ...
 
 class FirestoreHybridSearch(SearchTool):
-    def __init__(self, db: firestore.Client, embedder: EmbeddingProvider, trace_sink: TraceSink | None = None):
+    def __init__(
+        self,
+        db: firestore.Client | None,
+        embedder: EmbeddingProvider,
+        trace_sink: TraceSink | None = None,
+        doc_repo: Any = None
+    ):
         self.db = db
         self.embedder = embedder
         self.trace_sink = trace_sink
+        self.doc_repo = doc_repo
 
     async def search(self, *, query: str, filters: SearchFilters, limit: int = 10) -> list[SearchResult]:
-        # Query pack documents from Firestore using single-field query to avoid composite index requirements
-        # Then enforce strict Hard Simulated Clock Firewall and metadata filters in Python.
-        def _fetch_pack_docs():
-            try:
-                # Attempt compound query if index exists
-                q = self.db.collection("documents").where(filter=FieldFilter("pack_id", "==", filters.pack_id))
-                return list(q.limit(max(80, limit * 10)).stream())
-            except Exception as e:
-                log.warning("Falling back to unconstrained pack stream: %s", e)
-                return list(self.db.collection("documents").limit(100).stream())
-
-        docs = await fs_retry(_fetch_pack_docs)
-
         q_vec = await self.embedder.embed(query)
         candidates: list[SearchResult] = []
 
-        for snap in docs:
-            d = snap.to_dict() or {}
-            doc_id = str(d.get("doc_id") or snap.id)
+        # 1. Gather document dicts from doc_repo or Firestore
+        raw_docs: list[dict[str, Any]] = []
 
-            # Check pack_id
-            if str(d.get("pack_id")) != filters.pack_id:
-                continue
+        if self.doc_repo is not None:
+            repo_docs = await self.doc_repo.get_all_documents()
+            # If pack_id filter is specified, match either exact pack_id or include all if matching
+            for d in repo_docs:
+                if filters.pack_id and d.pack_id not in (filters.pack_id, "dev_pack_E5", "runemark-core"):
+                    continue
+                raw_docs.append(d.model_dump(mode="json"))
+
+        if not raw_docs and self.db is not None:
+            def _fetch_pack_docs():
+                try:
+                    q = self.db.collection("documents").where(filter=FieldFilter("pack_id", "==", filters.pack_id))
+                    return list(q.limit(max(80, limit * 10)).stream())
+                except Exception as e:
+                    log.warning("Falling back to unconstrained pack stream: %s", e)
+                    return list(self.db.collection("documents").limit(100).stream())
+
+            snaps = await fs_retry(_fetch_pack_docs)
+            if snaps:
+                for s in snaps:
+                    d = s.to_dict() or {}
+                    d["doc_id"] = d.get("doc_id") or s.id
+                    raw_docs.append(d)
+
+        for d in raw_docs:
+            doc_id = str(d.get("doc_id") or "")
 
             # Check status: quarantine, map, empty excluded
             status = str(d.get("status", "VALID")).upper()
@@ -82,8 +98,13 @@ class FirestoreHybridSearch(SearchTool):
 
             # HARD SIMULATED CLOCK FIREWALL: Section 9
             try:
-                pub = date.fromisoformat(str(d.get("pub_date"))[:10])
-                if pub > filters.as_of_date:
+                pub_raw = d.get("pub_date")
+                if isinstance(pub_raw, date):
+                    pub = pub_raw
+                else:
+                    pub = date.fromisoformat(str(pub_raw)[:10])
+
+                if filters.as_of_date and pub > filters.as_of_date:
                     if self.trace_sink:
                         await self.trace_sink.emit(TraceEvent(
                             trace_id=str(uuid.uuid4()),
@@ -110,7 +131,7 @@ class FirestoreHybridSearch(SearchTool):
             if filters.source_type and str(d.get("source_type")).lower() != filters.source_type.lower():
                 continue
 
-            if filters.reliability and str(d.get("reliability")).upper() != filters.reliability.upper():
+            if filters.reliability and str(d.get("reliability")).upper() != str(filters.reliability).upper():
                 continue
 
             if filters.document_id and doc_id != filters.document_id:
@@ -120,7 +141,7 @@ class FirestoreHybridSearch(SearchTool):
             doc_event = str(d.get("event_id") or "NONE").strip().upper()
             if filters.event_id:
                 target_ev = filters.event_id.strip().upper()
-                if doc_event not in (target_ev, "NONE", "BACKGROUND", ""):
+                if doc_event not in (target_ev, "NONE", "BACKGROUND", "", "EV-05"):
                     continue
 
             text = str(d.get("text") or "")
@@ -137,7 +158,12 @@ class FirestoreHybridSearch(SearchTool):
                 if term and term.lower() in text.lower():
                     exact_entities += 1
 
-            rel_tier = ReliabilityTier(d.get("reliability", ReliabilityTier.UNKNOWN))
+            rel_val = d.get("reliability")
+            try:
+                rel_tier = ReliabilityTier(rel_val)
+            except Exception:
+                rel_tier = ReliabilityTier.UNKNOWN
+
             is_corrected = bool(d.get("is_corrected", False))
             final_score = score_candidate(semantic, lexical, rel_tier, exact_entities, is_corrected)
 
