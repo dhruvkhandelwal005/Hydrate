@@ -36,9 +36,7 @@ class GroqProvider(LLMProvider):
         self.model = model or "qwen/qwen3.8-27b"
         self.fallback_models = [
             "qwen/qwen3.8-27b",
-            "openai/gpt-oss-120b",
-            "openai/gpt-oss-20b",
-            "allam-2-7b"
+            "openai/gpt-oss-20b"
         ]
 
     async def structured(self, *, system: str, user: str, schema: type[T]) -> T:
@@ -65,8 +63,8 @@ class GroqProvider(LLMProvider):
                             {"role": "user", "content": prompt}
                         ],
                         response_format={"type": "json_object"},
-                        max_tokens=850,
-                        timeout=8.0,
+                        max_tokens=2500,
+                        timeout=15.0,
                     )
                     content = r.choices[0].message.content
                     if not content:
@@ -175,9 +173,14 @@ class GeminiProvider(LLMProvider):
                             response_mime_type="application/json",
                         )
                     )
-                r = await asyncio.wait_for(asyncio.to_thread(_call), timeout=5.0)
+                r = await asyncio.wait_for(asyncio.to_thread(_call), timeout=25.0)
                 if r and r.text:
-                    return schema.model_validate_json(r.text)
+                    raw = r.text.strip()
+                    if raw.startswith("```json"):
+                        raw = raw.split("```json", 1)[1].split("```", 1)[0].strip()
+                    elif raw.startswith("```"):
+                        raw = raw.split("```", 1)[1].split("```", 1)[0].strip()
+                    return schema.model_validate_json(raw)
             except Exception as e:
                 last_exc = e
                 continue
@@ -588,9 +591,16 @@ class FallbackLLMProvider(LLMProvider):
 def get_llm_provider() -> LLMProvider:
     candidates: list[tuple[str, LLMProvider]] = []
 
-    # Priority 1: Groq with fast sub-second models and multi-key rotation
+    # Priority 1: Gemini (Ultra fast, large context, reliable JSON mode, no strict daily rate limits)
+    if settings.GEMINI_API_KEY:
+        try:
+            candidates.append(("gemini", GeminiProvider(api_key=settings.GEMINI_API_KEY, model=settings.GEMINI_MODEL)))
+            log.info("Registered primary fast LLM provider: Gemini (%s)", settings.GEMINI_MODEL)
+        except Exception as e:
+            log.warning("Could not init Gemini: %s", e)
+
+    # Priority 2: Groq with fast sub-second models and multi-key rotation
     groq_keys = []
-    # Prioritize keys with verified available token capacity
     for k in [settings.GROQ_API_KEY2, settings.GROQ_API_KEY3, settings.GROQ_API_KEY1, settings.GROQ_API_KEY]:
         if k and k.strip() and k.strip() not in groq_keys:
             groq_keys.append(k.strip())
@@ -602,11 +612,11 @@ def get_llm_provider() -> LLMProvider:
     if groq_keys:
         try:
             candidates.append(("groq", GroqProvider(api_keys=groq_keys, model="qwen/qwen3.8-27b")))
-            log.info("Registered primary fast LLM provider: Groq with %d keys", len(groq_keys))
+            log.info("Registered secondary LLM provider: Groq with %d keys", len(groq_keys))
         except Exception as e:
             log.warning("Could not init Groq: %s", e)
 
-    # Priority 2: Anthropic
+    # Priority 3: Anthropic
     anthropic_keys: list[tuple[str, str]] = []
     if settings.ANTHROPIC_API_KEY:
         anthropic_keys.append(("ANTHROPIC_API_KEY", settings.ANTHROPIC_API_KEY))
@@ -618,13 +628,6 @@ def get_llm_provider() -> LLMProvider:
             candidates.append(("anthropic", AnthropicProvider(api_keys=anthropic_keys, model=settings.ANTHROPIC_MODEL)))
         except Exception as e:
             log.warning("Could not init Anthropic: %s", e)
-
-    # Priority 3: Gemini
-    if settings.GEMINI_API_KEY:
-        try:
-            candidates.append(("gemini", GeminiProvider(api_key=settings.GEMINI_API_KEY, model=settings.GEMINI_MODEL)))
-        except Exception as e:
-            log.warning("Could not init Gemini: %s", e)
 
     # Priority 4: OpenAI
     if settings.OPENAI_API_KEY or settings.LLM_API_KEY:
