@@ -522,58 +522,104 @@ export default function CaseIntake() {
         };
     };
 
+    const syncTracesFromBackend = (traceData: any) => {
+        if (!traceData?.events || !Array.isArray(traceData.events)) return;
+        const tLogs: LogLine[] = [];
+        const lLogs: LogLine[] = [];
+        const oLogs: LogLine[] = [];
+        for (const ev of traceData.events) {
+            const p = ev.payload || {};
+            const tsFormatted = ev.timestamp ? ev.timestamp.slice(11, 23) : formatLogTime();
+            const tag = (ev.event_type?.replace("CLAIM_CREATED", "CLAIM")
+                                      .replace("CHALLENGE_CREATED", "ATTACK")
+                                      .replace("DEFENCE_CREATED", "DEFEND")
+                                      .replace("SEARCH_STARTED", "SEARCH")
+                                      .replace("SEARCH_RESULTS", "RETRIEVED")
+                                      .replace("RULING_CREATED", "RULING")
+                                      .replace("CLAIM_CONCEDED", "CONCEDE") || "SEARCH") as any;
+            const logText = p.text || p.query || p.reason || p.finding || (p.claim_id ? `Claim ${p.claim_id}: ${p.title || ""}` : ev.event_type);
+            const docIds = p.doc_ids || (p.doc_id ? [p.doc_id] : p.new_doc_ids || (p.counter_doc_ids ? p.counter_doc_ids : undefined));
+            const line: LogLine = {
+                id: ev.trace_id || `line_${Math.random().toString(36).slice(2, 8)}`,
+                time: tsFormatted,
+                tag,
+                text: logText,
+                docIds: Array.isArray(docIds) ? docIds : undefined,
+            };
+            if (ev.agent === "thor") tLogs.push(line);
+            else if (ev.agent === "loki") lLogs.push(line);
+            else oLogs.push(line);
+        }
+        if (tLogs.length > 0) setThorLogs(tLogs);
+        if (lLogs.length > 0) setLokiLogs(lLogs);
+        if (oLogs.length > 0) setOdinLogs(oLogs);
+    };
+
     const runFullCourtroomPipeline = async (caseId: string, force = false) => {
+        // Start a persistent SSE stream with replay so no early trace events are lost
+        const unsub = api.subscribeStream(
+            caseId,
+            handleStreamEvent,
+            (streamErr) => console.warn("Live SSE stream status:", streamErr),
+            true
+        );
+
         try {
             // STEP 1: Round 1 Parallel Advocacy (Thor & Loki)
             setPhase("r1_running");
             setThorLogOpen(true);
             setLokiLogOpen(true);
-            const unsub1 = api.subscribeStream(caseId, handleStreamEvent);
+            setActiveEventMessage("⚔️ Round 1: Thor and Loki advocating in parallel...");
             await api.advanceCase(caseId, "round1", force);
-            await wait(600);
-            unsub1();
 
-            const cData1 = await api.getCase(caseId);
-            if (cData1.claims && cData1.claims.length > 0) {
+            const [cData1, traceData1] = await Promise.all([
+                api.getCase(caseId).catch(() => null),
+                api.getCaseTrace(caseId).catch(() => null),
+            ]);
+            if (cData1?.claims && cData1.claims.length > 0) {
                 setThorClaims(cData1.claims.filter((c: any) => c.agent === "thor").map(mapClaimToUi));
                 setLokiClaims(cData1.claims.filter((c: any) => c.agent === "loki").map(mapClaimToUi));
             }
-            setPhase("r1_done");
-            setActiveEventMessage("Round 1 Complete! Advancing to Round 2 Cross-Examination...");
+            if (traceData1) syncTracesFromBackend(traceData1);
 
-            await wait(700);
+            setPhase("r1_done");
+            setActiveEventMessage("✓ Round 1 Complete! Opening claims established. Advancing to Round 2 Cross-Examination...");
+            await wait(1000);
 
             // STEP 2: Round 2 Cross-Examination & Defences
             setPhase("r2_running");
-            const unsub2 = api.subscribeStream(caseId, handleStreamEvent);
+            setActiveEventMessage("⚡ Round 2: Adversarial cross-examination and counter-evidence rebuttals...");
             await api.advanceCase(caseId, "round2", force);
-            await wait(600);
-            unsub2();
 
-            const cData2 = await api.getCase(caseId);
-            if (cData2.claims && cData2.claims.length > 0) {
+            const [cData2, traceData2] = await Promise.all([
+                api.getCase(caseId).catch(() => null),
+                api.getCaseTrace(caseId).catch(() => null),
+            ]);
+            if (cData2?.claims && cData2.claims.length > 0) {
                 setThorClaims(cData2.claims.filter((c: any) => c.agent === "thor").map(mapClaimToUi));
                 setLokiClaims(cData2.claims.filter((c: any) => c.agent === "loki").map(mapClaimToUi));
             }
-            setPhase("r2_done");
-            setActiveEventMessage("Round 2 Complete! Summoning Odin the Allfather...");
+            if (traceData2) syncTracesFromBackend(traceData2);
 
-            await wait(700);
+            setPhase("r2_done");
+            setActiveEventMessage("✓ Round 2 Complete! Cross-examination concluded. Summoning Odin the Allfather...");
+            await wait(1000);
 
             // STEP 3: Odin Judicial Review
             setPhase("judging");
             setOdinLogOpen(true);
             setGateOverlay(true);
-            await wait(1000);
+            setActiveEventMessage("ᛟ The Seat of the Allfather: Odin weighing cross-examination claims and as-of cutoff...");
+            await wait(800);
             setGateOverlay(false);
 
-            const unsub3 = api.subscribeStream(caseId, handleStreamEvent);
             await api.advanceCase(caseId, "judge", force);
-            await wait(600);
-            unsub3();
 
-            const rulingData = await api.getCaseRuling(caseId);
-            if (rulingData.rulings && rulingData.rulings.length > 0) {
+            const [rulingData, traceData3] = await Promise.all([
+                api.getCaseRuling(caseId).catch(() => null),
+                api.getCaseTrace(caseId).catch(() => null),
+            ]);
+            if (rulingData?.rulings && rulingData.rulings.length > 0) {
                 setOdinRulings(rulingData.rulings.map((r: any) => ({
                     claimId: r.claim_id,
                     claimant: r.claim_id?.startsWith("T") ? "Thor" : "Loki",
@@ -584,6 +630,8 @@ export default function CaseIntake() {
                     docId: r.doc_ids?.[0] || "ORV-0002",
                 })));
             }
+            if (traceData3) syncTracesFromBackend(traceData3);
+
             setPhase("ruled");
             setActiveEventMessage("⚖️ Odin has delivered the Final Judicial Decree!");
         } catch (err: any) {
@@ -591,6 +639,8 @@ export default function CaseIntake() {
             if (isMountedRef.current) {
                 setError("Workflow error: " + (err.message || String(err)));
             }
+        } finally {
+            unsub();
         }
     };
 
