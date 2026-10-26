@@ -1,7 +1,0 @@
-.env
-.env.*
-!.env.example
-Secrets/
-**/__pycache__/
-*.py[cod]
-**/*service-account*.json
