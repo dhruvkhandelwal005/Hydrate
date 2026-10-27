@@ -1,20 +1,29 @@
+# Node dependencies
+node_modules/
+**/node_modules/
+
+# Frontend builds
+dist/
+**/dist/
+
 # Python
 __pycache__/
+**/__pycache__/
 *.py[cod]
-*.egg-info/
 .venv/
 venv/
 
-# Node
-node_modules/
-dist/
-.next/
-
-# Environment files
+# Environment/secrets
 .env
 .env.*
 !.env.example
 
-# Generated backend data (keep the directory placeholder)
-backend/data/*
-!backend/data/.gitkeep
+# Logs
+*.log
+npm-debug.log*
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

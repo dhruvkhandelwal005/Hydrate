@@ -33,6 +33,25 @@ export default function AppShell() {
                             {label}
                         </NavLink>
                     ))}
+                    <button
+                        type="button"
+                        className="rg-link"
+                        style={{
+                            background: "rgba(234, 179, 8, 0.15)",
+                            border: "1px solid #eab308",
+                            color: "#fef08a",
+                            cursor: "pointer",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            fontWeight: 600,
+                            borderRadius: "6px"
+                        }}
+                        onClick={() => window.dispatchEvent(new CustomEvent("open-case-logs"))}
+                        title="Open Case History & Audit Dossier Vault"
+                    >
+                        <span>📜</span> Case Audit Logs
+                    </button>
                 </nav>
             </header>
 

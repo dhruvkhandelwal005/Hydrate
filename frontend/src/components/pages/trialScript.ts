@@ -69,7 +69,7 @@ export interface ExecutiveDirective {
 }
 
 export interface ExposureEvidenceItem {
-    id: string; // e.g. "ORV-0412" or "T-07 row 5"
+    id: string; // e.g. "ORV-0024" or "T-07 row 5"
     docId?: string;
     tradeRow?: string;
     label: string;
@@ -126,12 +126,12 @@ export const TRIAL_SCRIPT: TrialScriptData = {
         claims: [
             {
                 id: "T-101",
-                title: "Rotterdam & Antwerp Deep-Water Berth Gridlock",
-                body: "Vessel queuing exceeds 42 container ships. Inbound raw polymers face indefinite demurrage, exceeding plant storage buffers.",
-                docId: "ORV-0412",
-                docName: "Rotterdam_Berth_Manifest_Q3.pdf",
-                country: "Netherlands / Belgium",
-                sector: "Chemicals",
+                title: "Orvan Deep Harbor & Bulk Pier Transit Gridlock",
+                body: "Vessel queuing exceeds 42 bulk grain freighters. Inbound grain and agricultural feedstock face indefinite demurrage, exceeding silo storage buffers.",
+                docId: "ORV-0002",
+                docName: "Orvan_Corridor_Transit_Manifest.pdf",
+                country: "Midgard / Tolan",
+                sector: "Wheat & Grain",
                 confidence: 94,
                 estimateLow: 40,
                 estimateHigh: 55,
@@ -140,23 +140,23 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 attack: {
                     attacker: "Loki",
                     weaknessType: "ignored substitution",
-                    critique: "Thor assumes fixed port routing; ignores barge and feeder transshipment via Wilhelmshaven and Dunkirk terminals.",
+                    critique: "Thor assumes fixed port routing; ignores Ravik rail transshipment and Vanir maritime terminals.",
                 },
                 rebuttal: {
                     type: "DEFEND",
-                    reason: "Secondary feeder drafts at Dunkirk cannot accommodate ultra-large container vessels (ULCVs) carrying bulk resin polymers.",
-                    newDocId: "ORV-0899",
-                    newDocName: "Rhine_Barge_Low_Water_Draft_Advisory.pdf",
+                    reason: "Secondary rail gauge transshipment at Ravik border terminals lacks bulk grain hoppers to match maritime bulk capacity.",
+                    newDocId: "ORV-0021",
+                    newDocName: "Ravik_Rail_Throughput_Audit.pdf",
                 },
             },
             {
                 id: "T-102",
-                title: "Tier-2 Semiconductor Lead Times Surge to 34 Weeks",
-                body: "Disruption at Malacca Strait bypasses adds 18 transit days. Automotive OEM safety buffers depleted within 12 days.",
-                docId: "ORV-0388",
-                docName: "Microelectronics_Supply_Route_Audit.docx",
-                country: "Taiwan",
-                sector: "Semiconductors / Automotive",
+                title: "Maize & Feedstock Inflow Lead Times Surge Across Tolan",
+                body: "Disruption at Orvan corridor checkpoints adds 18 transit days. Tolan agricultural feed safety buffers depleted within 14 days.",
+                docId: "ORV-0009",
+                docName: "Agricultural_Feedstock_Trade_Telemetry.txt",
+                country: "Tolan",
+                sector: "Maize & Feedstock",
                 confidence: 89,
                 estimateLow: 25,
                 estimateHigh: 42,
@@ -167,7 +167,7 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 id: "T-103",
                 title: "Spot Titanium & Specialty Alloys Surge +44%",
                 body: "Spot contracts triggering force majeure notices across 7 major aerospace and precision manufacturing suppliers.",
-                docId: "ORV-0501",
+                docId: "ORV-0017",
                 docName: "Trade_Table_Commodities_Index.csv",
                 country: "Germany",
                 sector: "Specialty alloys",
@@ -199,7 +199,7 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "SEARCH",
-                text: '"port berth congestion Rotterdam Antwerp container wait times"',
+                text: '"port berth congestion Orvan Ravik Port container wait times"',
             },
             {
                 tag: "FILTERS",
@@ -207,13 +207,13 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "RETRIEVED",
-                text: "Retrieved maritime terminal status records ORV-0412 and ORV-0388",
-                docIds: ["ORV-0412", "ORV-0388"],
+                text: "Retrieved maritime terminal status records ORV-0024 and ORV-0388",
+                docIds: ["ORV-0024", "ORV-0388"],
             },
             {
                 tag: "CLAIM",
-                text: "Asserted T-101: Rotterdam berth gridlock estimate 40% to 55%",
-                docIds: ["ORV-0412"],
+                text: "Asserted T-101: Orvan berth gridlock estimate 40% to 55%",
+                docIds: ["ORV-0024"],
             },
             {
                 tag: "SEARCH",
@@ -235,13 +235,13 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "RETRIEVED",
-                text: "Retrieved commodity pricing index ORV-0501 and rail telemetry ORV-0622",
-                docIds: ["ORV-0501", "ORV-0622"],
+                text: "Retrieved commodity pricing index ORV-0017 and rail telemetry ORV-0622",
+                docIds: ["ORV-0017", "ORV-0622"],
             },
             {
                 tag: "CLAIM",
                 text: "Asserted T-103: Spot alloy price inflation estimate 38% to 48%",
-                docIds: ["ORV-0501"],
+                docIds: ["ORV-0017"],
             },
             {
                 tag: "CLAIM",
@@ -260,27 +260,27 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "RETRIEVED",
-                text: "Retrieved IATA fuel surcharge matrix ORV-0771",
-                docIds: ["ORV-0771"],
+                text: "Retrieved IATA fuel surcharge matrix ORV-0034",
+                docIds: ["ORV-0034"],
             },
             {
                 tag: "ATTACK",
                 text: "Attacked L-203: weakness=physical vs commercial (fuel surcharges +210% render bulk air bridge non-viable)",
-                docIds: ["ORV-0771"],
+                docIds: ["ORV-0034"],
             },
             {
                 tag: "BLOCKED",
-                text: 'Duplicate query blocked: "port berth congestion Rotterdam" violates no-repeat rule',
+                text: 'Duplicate query blocked: "port berth congestion Orvan" violates no-repeat rule',
             },
             {
                 tag: "REBUTTAL",
-                text: "Evaluating Loki attack on T-101; fetching secondary barge telemetry ORV-0899",
-                docIds: ["ORV-0899"],
+                text: "Evaluating Loki attack on T-101; fetching secondary barge telemetry ORV-0047",
+                docIds: ["ORV-0047"],
             },
             {
                 tag: "DEFEND",
-                text: "Defended T-101: Draft depths at Rhine feeders prevent ULCV resin transshipment",
-                docIds: ["ORV-0899"],
+                text: "Defended T-101: Draft depths at regional feeder links prevent ULCV resin transshipment",
+                docIds: ["ORV-0047"],
             },
         ],
     },
@@ -288,12 +288,12 @@ export const TRIAL_SCRIPT: TrialScriptData = {
         claims: [
             {
                 id: "L-201",
-                title: "Sovereign Strategic Stockpiles Hold 60-Day Cushion",
-                body: "Government-mandated reserves of critical polymers and diesel are fully primed. No industrial rationing required before Day 45.",
-                docId: "ORV-0711",
-                docName: "EU_Energy_And_Reserves_Directive.pdf",
-                country: "Netherlands / Germany",
-                sector: "Chemicals / Energy",
+                title: "Sovereign Strategic Grain Stockpiles Hold 60-Day Buffer",
+                body: "Government-mandated grain and wheat reserves across Midgard and Tolan are fully stocked. No domestic rationing required before Day 60.",
+                docId: "ORV-0012",
+                docName: "Realm_Strategic_Grain_Reserves_Directive.pdf",
+                country: "Midgard / Tolan",
+                sector: "Wheat & Grain",
                 confidence: 92,
                 estimateLow: 5,
                 estimateHigh: 15,
@@ -302,12 +302,12 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 id: "L-202",
-                title: "Automated Dual-Sourcing Clauses Active Under ISO-9001",
-                body: "Contracts mandate automatic secondary supplier activation within 72 hours. Alternative Turkish & Iberian fabs absorb 60% of shortfall.",
-                docId: "ORV-0544",
-                docName: "Master_Supplier_Agreements_Annex_C.docx",
-                country: "Taiwan",
-                sector: "Semiconductors",
+                title: "Ravik Overland Rail Rerouting Clauses Active",
+                body: "Contracts mandate automatic secondary overland routing through Ravik within 72 hours. Alternative rail routes absorb 45% of grain shortfall.",
+                docId: "ORV-0035",
+                docName: "Ravik_Overland_Transit_Treaty.docx",
+                country: "Ravik",
+                sector: "Logistics & Grain",
                 confidence: 88,
                 estimateLow: 10,
                 estimateHigh: 22,
@@ -316,12 +316,12 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 id: "L-203",
-                title: "Belly-Cargo Air Bridge Viable for High-Margin Electronics",
-                body: "Lightweight chips and microcontrollers rerouted via chartered belly cargo with only a 1.2% final unit cost impact.",
-                docId: "ORV-0490",
-                docName: "Global_Air_Cargo_Availability_Matrix.xlsx",
-                country: "Taiwan",
-                sector: "Electronics",
+                title: "Emergency Air Cargo Lift Viable for Critical Seeds & Maize",
+                body: "High-value agricultural seeds and specialized maize cultivars rerouted via chartered cargo with minimal net landed cost impact.",
+                docId: "ORV-0042",
+                docName: "Vanir_Air_Cargo_Telemetry.txt",
+                country: "Vanir",
+                sector: "Maize & Agricultural",
                 confidence: 85,
                 estimateLow: 8,
                 estimateHigh: 18,
@@ -330,21 +330,21 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 attack: {
                     attacker: "Thor",
                     weaknessType: "physical vs commercial",
-                    critique: "Thor proves jet-A1 fuel surcharges and airframe shortages make widebody belly chartering commercially untenable for production runs.",
+                    critique: "Thor proves bulk aviation fuel surcharges and payload constraints make air freight commercially untenable for bulk grain.",
                 },
                 rebuttal: {
                     type: "CONCEDE",
-                    reason: "Conceded: Verified aviation fuel surcharge spikes preclude commercial air bridge at tier-2 automotive scale.",
+                    reason: "Conceded: Verified aviation fuel surcharge spikes preclude commercial air lift at bulk agricultural scale.",
                 },
             },
             {
                 id: "L-204",
                 title: "Paper Futures Panic Unwinds Once Spot Deliveries Arrive",
-                body: "Commodity price spikes are speculative paper panics by futures desks. Physical customs manifests confirm continuous bilateral flow.",
-                docId: "ORV-0680",
-                docName: "Commodity_Exchange_Spot_Deliveries.txt",
-                country: "Netherlands",
-                sector: "Commodities",
+                body: "Grain price spikes are speculative paper panics by futures traders. Physical customs manifests confirm continuous bilateral overland deliveries.",
+                docId: "ORV-0021",
+                docName: "Realm_Mercantile_Customs_Deliveries.txt",
+                country: "Midgard",
+                sector: "Wheat & Commodities",
                 confidence: 90,
                 estimateLow: 12,
                 estimateHigh: 20,
@@ -367,13 +367,13 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "RETRIEVED",
-                text: "Retrieved sovereign reserves filing ORV-0711",
-                docIds: ["ORV-0711"],
+                text: "Retrieved sovereign reserves filing ORV-0012",
+                docIds: ["ORV-0012"],
             },
             {
                 tag: "CLAIM",
                 text: "Asserted L-201: Strategic stockpile buffer estimate 5% to 15%",
-                docIds: ["ORV-0711"],
+                docIds: ["ORV-0012"],
             },
             {
                 tag: "SEARCH",
@@ -396,7 +396,7 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "SEARCH",
-                text: '"physical spot delivery records Rotterdam customs manifests"',
+                text: '"physical spot delivery records Orvan customs manifests"',
             },
             {
                 tag: "RETRIEVED",
@@ -412,7 +412,7 @@ export const TRIAL_SCRIPT: TrialScriptData = {
         round2Log: [
             {
                 tag: "ATTACK",
-                text: "Examining Thor claim T-101 (Rotterdam Port Chokepoint)",
+                text: "Examining Thor claim T-101 (Orvan Port Chokepoint)",
             },
             {
                 tag: "SEARCH",
@@ -424,8 +424,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "REBUTTAL",
-                text: "Assessing Thor attack on L-203 regarding jet fuel surcharges ORV-0771",
-                docIds: ["ORV-0771"],
+                text: "Assessing Thor attack on L-203 regarding jet fuel surcharges ORV-0034",
+                docIds: ["ORV-0034"],
             },
             {
                 tag: "CONCEDE",
@@ -445,13 +445,13 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
             {
                 tag: "RULING",
-                text: "Adjudicating T-101: Thor provided verified radar manifests ORV-0412 and defended against feeder substitution via ORV-0899",
-                docIds: ["ORV-0412", "ORV-0899"],
+                text: "Adjudicating T-101: Thor provided verified radar manifests ORV-0024 and defended against feeder substitution via ORV-0047",
+                docIds: ["ORV-0024", "ORV-0047"],
             },
             {
                 tag: "RULING",
-                text: "Adjudicating L-201: Loki established sovereign reserve buffer via statutory directive ORV-0711",
-                docIds: ["ORV-0711"],
+                text: "Adjudicating L-201: Loki established sovereign reserve buffer via statutory directive ORV-0012",
+                docIds: ["ORV-0012"],
             },
             {
                 tag: "RULING",
@@ -466,11 +466,11 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             {
                 claimId: "T-101",
                 claimant: "Thor",
-                claimTitle: "Rotterdam & Antwerp Deep-Water Berth Gridlock",
+                claimTitle: "Orvan Corridor & Maritime Port Deep-Water Berth Gridlock",
                 verdict: "Established",
                 nature: "fact",
-                decree: "Berth delays confirmed by Doc ORV-0412 radar manifests and defended by ORV-0899. Vessel queue exceeds 9.4 days; severe container demurrage upheld.",
-                docId: "ORV-0412",
+                decree: "Berth delays confirmed by Doc ORV-0024 radar manifests and defended by ORV-0047. Vessel queue exceeds 9.4 days; severe container demurrage upheld.",
+                docId: "ORV-0024",
             },
             {
                 claimId: "L-201",
@@ -478,8 +478,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 claimTitle: "Sovereign Strategic Stockpiles Hold 60-Day Cushion",
                 verdict: "Established",
                 nature: "fact",
-                decree: "Loki established statutory sovereign reserve buffers via Doc ORV-0711. Immediate industrial starvation claims are legally dispelled through Day 45.",
-                docId: "ORV-0711",
+                decree: "Loki established statutory sovereign reserve buffers via Doc ORV-0012. Immediate industrial starvation claims are legally dispelled through Day 45.",
+                docId: "ORV-0012",
             },
             {
                 claimId: "T-102",
@@ -505,8 +505,8 @@ export const TRIAL_SCRIPT: TrialScriptData = {
                 claimTitle: "Spot Titanium & Specialty Alloys Surge +44%",
                 verdict: "Established",
                 nature: "fact",
-                decree: "Trade index ORV-0501 confirms spot price spikes and bilateral force majeure declarations among precision metal alloys.",
-                docId: "ORV-0501",
+                decree: "Trade index ORV-0017 confirms spot price spikes and bilateral force majeure declarations among precision metal alloys.",
+                docId: "ORV-0017",
             },
             {
                 claimId: "L-203",
@@ -537,7 +537,7 @@ export const TRIAL_SCRIPT: TrialScriptData = {
             },
         ],
         synthesis:
-            "The Allfather has weighed Thor's alarm against Loki's counter-measures across 11 admissible docket documents. Maritime deep-water terminal paralysis at Rotterdam will severely stress tier-1 automotive logistics, but sovereign reserve buffers and contractual secondary corridors prevent a systemic industrial collapse before Day 45.",
+            "The Allfather has weighed Thor's alarm against Loki's counter-measures across 11 admissible docket documents. Maritime deep-water terminal paralysis at Orvan will severely stress tier-1 automotive logistics, but sovereign reserve buffers and contractual secondary corridors prevent a systemic industrial collapse before Day 45.",
         riskScore: 58,
         directives: [
             {
@@ -629,24 +629,24 @@ export const EXPOSURE_ROWS: ExposureRow[] = [
             display: "55%",
             low: 40,
             high: 55,
-            docId: "ORV-0412",
+            docId: "ORV-0024",
             tradeRow: "T-07 row 5",
         },
         lokiLow: {
             display: "20%",
             low: 20,
             high: 35,
-            docId: "ORV-0711",
+            docId: "ORV-0012",
         },
         odinFinal: {
             display: "28 to 42%",
             low: 28,
             high: 42,
-            docId: "ORV-0412",
+            docId: "ORV-0024",
         },
         evidence: [
-            { id: "ORV-0412", docId: "ORV-0412", label: "ORV-0412", description: "Rotterdam Deep-Water Terminal Congestion Manifest" },
-            { id: "T-07 row 5", docId: "ORV-0412", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Commodity Trade Flows — Polymer Feedstock Demurrage" },
+            { id: "ORV-0024", docId: "ORV-0024", label: "ORV-0024", description: "Orvan Deep-Water Terminal Congestion Manifest" },
+            { id: "T-07 row 5", docId: "ORV-0024", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Commodity Trade Flows — Polymer Feedstock Demurrage" },
         ],
         nextQuarterOutlook: {
             projectedRange: "14 to 22%",
@@ -695,7 +695,7 @@ export const EXPOSURE_ROWS: ExposureRow[] = [
             display: "40%",
             low: 25,
             high: 40,
-            docId: "ORV-0501",
+            docId: "ORV-0017",
         },
         lokiLow: {
             display: "15%",
@@ -707,10 +707,10 @@ export const EXPOSURE_ROWS: ExposureRow[] = [
             display: "20 to 30%",
             low: 20,
             high: 30,
-            docId: "ORV-0501",
+            docId: "ORV-0017",
         },
         evidence: [
-            { id: "ORV-0501", docId: "ORV-0501", label: "ORV-0501", description: "Specialty Chemicals Force Majeure Filings & Spot Index" },
+            { id: "ORV-0017", docId: "ORV-0017", label: "ORV-0017", description: "Specialty Chemicals Force Majeure Filings & Spot Index" },
         ],
         nextQuarterOutlook: {
             projectedRange: "12 to 20%",
@@ -721,31 +721,31 @@ export const EXPOSURE_ROWS: ExposureRow[] = [
     },
     {
         id: "exp-4",
-        country: "Netherlands / Belgium",
-        sector: "Chemicals & Polymers",
+        country: "Midgard",
+        sector: "Wheat & Grain",
         thorHigh: {
             display: "55%",
             low: 40,
             high: 55,
-            docId: "ORV-0412",
+            docId: "ORV-0002",
             tradeRow: "T-07 row 5",
         },
         lokiLow: {
             display: "15%",
             low: 5,
             high: 15,
-            docId: "ORV-0711",
+            docId: "ORV-0012",
         },
         odinFinal: {
             display: "28 to 42%",
             low: 28,
             high: 42,
-            docId: "ORV-0412",
+            docId: "ORV-0002",
         },
         evidence: [
-            { id: "ORV-0412", docId: "ORV-0412", label: "ORV-0412", description: "Rotterdam Berth Radar Manifest & Demurrage Report" },
-            { id: "T-07 row 5", docId: "ORV-0412", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Trade Matrix: Antwerp Liquid Chemical Inflow" },
-            { id: "ORV-0711", docId: "ORV-0711", label: "ORV-0711", description: "EU Strategic Petroleum & Petrochemical Reserves Directive" },
+            { id: "ORV-0002", docId: "ORV-0002", label: "ORV-0002", description: "Orvan Deep Harbor Transit Manifest & Demurrage Report" },
+            { id: "T-07 row 5", docId: "ORV-0002", tradeRow: "T-07 row 5", label: "T-07 row 5", description: "Trade Matrix: Midgard Agricultural Grain Inflow" },
+            { id: "ORV-0012", docId: "ORV-0012", label: "ORV-0012", description: "Realm Strategic Grain & Fertilizer Reserves Directive" },
         ],
         nextQuarterOutlook: {
             projectedRange: "14 to 22%",
@@ -756,59 +756,61 @@ export const EXPOSURE_ROWS: ExposureRow[] = [
     },
     {
         id: "exp-5",
-        country: "Taiwan",
-        sector: "Semiconductors & Automotive MCUs",
+        country: "Tolan",
+        sector: "Maize & Agricultural",
         thorHigh: {
             display: "42%",
             low: 25,
             high: 42,
-            docId: "ORV-0388",
+            docId: "ORV-0009",
         },
         lokiLow: {
             display: "10%",
             low: 10,
             high: 22,
-            docId: "ORV-0544",
+            docId: "ORV-0035",
         },
         odinFinal: {
             display: "18 to 28%",
             low: 18,
             high: 28,
-            docId: "ORV-0388",
+            docId: "ORV-0009",
         },
         evidence: [
-            { id: "ORV-0388", docId: "ORV-0388", label: "ORV-0388", description: "Microelectronics Supply Route & Lead Time Audit" },
-            { id: "ORV-0544", docId: "ORV-0544", label: "ORV-0544", description: "Master Supplier Agreements Annex C (ISO-9001 Dual-Sourcing)" },
+            { id: "ORV-0009", docId: "ORV-0009", label: "ORV-0009", description: "Maize Supply Route & Lead Time Audit" },
+            { id: "ORV-0035", docId: "ORV-0035", label: "ORV-0035", description: "Ravik Master Transit Treaty (Bilateral Overland Route)" },
         ],
         nextQuarterOutlook: {
             projectedRange: "8 to 15%",
             trajectory: "improving",
-            assumptions: "Tier-1 automotive fabs switch 40% of microelectronic procurement to qualified European secondary fabs.",
+            assumptions: "Tolan grain milling operations switch 40% of agricultural procurement to overland rail corridors.",
         },
         category: "trial",
     },
     {
         id: "exp-6",
-        country: "Germany",
-        sector: "Specialty Alloys & Titanium",
+        country: "Vanir",
+        sector: "Fertilizer & Chemicals",
         thorHigh: {
             display: "48%",
             low: 38,
             high: 48,
-            docId: "ORV-0501",
+            docId: "ORV-0021",
         },
         lokiLow: {
-            display: "insufficient evidence",
-            isInsufficient: true,
+            display: "12%",
+            low: 12,
+            high: 20,
+            docId: "ORV-0042",
         },
         odinFinal: {
             display: "38 to 48%",
             low: 38,
             high: 48,
-            docId: "ORV-0501",
+            docId: "ORV-0021",
         },
         evidence: [
-            { id: "ORV-0501", docId: "ORV-0501", label: "ORV-0501", description: "Precision Titanium Spot Pricing Index & Force Majeure Notices" },
+            { id: "ORV-0017", docId: "ORV-0017", label: "ORV-0017", description: "Precision Titanium Spot Pricing Index & Force Majeure Notices" },
         ],
         nextQuarterOutlook: {
             projectedRange: "25 to 35%",

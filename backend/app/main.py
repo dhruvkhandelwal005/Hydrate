@@ -1,75 +1,115 @@
-from fastapi import FastAPI
+from __future__ import annotations
+import os
+import uuid
+import logging
+from contextlib import asynccontextmanager
+from typing import AsyncIterator
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from app.config import settings
+from app.api.routes import health, ingestion, sources, briefing, stream, cases, judge_mode, export
+from app.services.container import get_container
 
-app = FastAPI()
+log = logging.getLogger("ragnarok.main")
 
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    log.info("RAGNAROK Adversarial Courtroom Backend starting...")
+    try:
+        container = get_container()
+        log.info("Container initialized successfully. Document and Trade stores ready.")
+    except Exception as e:
+        log.warning("Container initialization notice: %s", e)
+    yield
+    log.info("RAGNAROK Backend shutdown complete.")
+
+app = FastAPI(
+    title="RAGNAROK — Trial of the Nine Realms",
+    description="Adversarial Multi-Agent Supply Chain Disruption Intelligence Platform",
+    version="2.0.0",
+    lifespan=lifespan
+)
+
+# CORS configuration: must allow http://localhost:5173, http://localhost:5174, etc.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:3000"
+    ],
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
+@app.middleware("http")
+async def request_id_middleware(request: Request, call_next):
+    rid = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+    response = await call_next(request)
+    response.headers["X-Request-ID"] = rid
+    return response
+
+# Standard JSON error format: { "detail": "human readable message" } for all errors
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    detail_msg = exc.detail if isinstance(exc.detail, str) else str(exc.detail)
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": detail_msg},
+        headers={"X-Request-ID": request.headers.get("X-Request-ID", "")}
+    )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    msg = "; ".join(f"{err.get('loc', ['field'])[-1]}: {err.get('msg', 'invalid')}" for err in errors)
+    return JSONResponse(
+        status_code=422,
+        content={"detail": f"Validation error: {msg}"},
+        headers={"X-Request-ID": request.headers.get("X-Request-ID", "")}
+    )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    log.error("Unhandled exception at %s: %s", request.url.path, exc, exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"},
+        headers={"X-Request-ID": request.headers.get("X-Request-ID", "")}
+    )
 
 @app.get("/health")
-def health() -> dict[str, str]:
-    return {"status": "ok"}
-
-
-@app.get("/v1/packs")
-def list_packs():
-    return [
-        {
-            "pack_id": "pack-rotterdam-2026",
-            "state": "READY",
-            "files": [
-                {"doc_id": "ORV-0412", "path": "Rotterdam_Berth_Manifest_Q3.pdf", "status": "VALID"},
-                {"doc_id": "ORV-0388", "path": "Microelectronics_Supply_Route_Audit.pdf", "status": "VALID"},
-                {"doc_id": "ORV-0501", "path": "Trade_Table_Commodities_Index.pdf", "status": "VALID"},
-                {"doc_id": "ORV-0711", "path": "EU_Energy_And_Reserves_Directive.pdf", "status": "VALID"},
-                {"doc_id": "ORV-0544", "path": "Master_Supplier_Agreements_Annex_C.pdf", "status": "VALID"},
-            ],
-            "file_count": 5,
-            "valid_count": 5,
-            "created_at": "2026-10-24T12:00:00Z",
-        }
-    ]
-
-
-@app.get("/v1/packs/{pack_id}/status")
-def get_pack_status(pack_id: str):
+@app.get("/api/health")
+async def root_health():
     return {
-        "pack_id": pack_id,
-        "state": "READY",
-        "files": [
-            {"doc_id": "ORV-0412", "path": "Rotterdam_Berth_Manifest_Q3.pdf", "status": "VALID"},
-            {"doc_id": "ORV-0388", "path": "Microelectronics_Supply_Route_Audit.pdf", "status": "VALID"},
-            {"doc_id": "ORV-0501", "path": "Trade_Table_Commodities_Index.pdf", "status": "VALID"},
-            {"doc_id": "ORV-0711", "path": "EU_Energy_And_Reserves_Directive.pdf", "status": "VALID"},
-            {"doc_id": "ORV-0544", "path": "Master_Supplier_Agreements_Annex_C.pdf", "status": "VALID"},
-        ],
-        "file_count": 5,
-        "valid_count": 5,
-        "created_at": "2026-10-24T12:00:00Z",
+        "status": "healthy",
+        "platform": "RAGNAROK — Trial of the Nine Realms",
+        "architecture": "Four-agent adversarial courtroom (Heimdall, Thor, Loki, Odin)",
+        "service": "backend"
     }
 
+# Register API routes under /api/v1 and /v1 alias
+routers = [health.router, ingestion.router, sources.router, cases.router, stream.router, briefing.router, judge_mode.router, export.router]
+for r in routers:
+    app.include_router(r, prefix=settings.API_PREFIX)
+    if settings.API_PREFIX != "/v1":
+        app.include_router(r, prefix="/v1")
 
-@app.post("/v1/packs/ingest")
-def ingest_pack():
-    return {"pack_id": "pack-rotterdam-2026"}
-
-
-@app.post("/v1/cases")
-def create_case(payload: dict):
+@app.get("/")
+async def root():
     return {
-        "case_id": "case-rotterdam-001",
-        "question": payload.get("question", "Rotterdam supply chain disruption"),
-        "as_of_date": payload.get("as_of_date", "2026-10-24"),
-        "created_at": "2026-10-24T12:00:00Z",
+        "service": "RAGNAROK — Trial of the Nine Realms",
+        "description": "Adversarial Multi-Agent Supply Chain Disruption Intelligence Platform",
+        "agents": ["Heimdall (Gatekeeper)", "Thor (High Exposure)", "Loki (Limited Exposure)", "Odin (Judge)"],
+        "docs_url": "/docs",
+        "health_url": f"{settings.API_PREFIX}/health"
     }
-
-
-@app.post("/v1/cases/{case_id}/run")
-def run_case(case_id: str):
-    return {"run_id": f"run-{case_id}-01"}

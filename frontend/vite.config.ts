@@ -90,6 +90,31 @@ function devApiFallbackPlugin(): Plugin {
           return res.end(JSON.stringify({ pack_id: `pack-${Date.now().toString(36)}` }));
         }
 
+        if ((url === "/v1/cases" || url.startsWith("/v1/cases?")) && req.method === "GET") {
+          res.statusCode = 200;
+          return res.end(
+            JSON.stringify([
+              {
+                case_id: "case-rotterdam-001",
+                run_id: "run_1",
+                question: "Rotterdam critical terminal outage and northern rail rerouting evaluation",
+                as_of_date: "2027-01-25",
+                pack_id: DEMO_PACK.pack_id,
+                countries: ["Netherlands", "Germany", "Belgium"],
+                sectors: ["Maritime", "Chemicals", "Bulk Grain"],
+                event_hypothesis: "Critical freight congestion at Maasvlakte II terminal",
+                event_id: "evt-rotterdam-01",
+                verification_status: "VERIFIED",
+                verification_reason: "Cross-verified with berth manifests and port authority bulletins.",
+                verification_doc_ids: ["ORV-0412", "ORV-0388"],
+                excluded_count: 0,
+                phase: "complete",
+                status: "CLOSED",
+              },
+            ])
+          );
+        }
+
         if (url === "/v1/cases" && req.method === "POST") {
           res.statusCode = 200;
           return res.end(
@@ -102,6 +127,95 @@ function devApiFallbackPlugin(): Plugin {
               countries: ["Netherlands", "Germany", "Taiwan"],
               sectors: ["Chemicals", "Semiconductors"],
               status: "active",
+            })
+          );
+        }
+
+        if (url.startsWith("/v1/cases/") && url.endsWith("/logs") && req.method === "DELETE") {
+          const caseId = url.split("/")[3];
+          res.statusCode = 200;
+          return res.end(JSON.stringify({ status: "ok", message: `Logs cleared for case ${caseId}`, case_id: caseId }));
+        }
+
+        if (url.startsWith("/v1/cases/") && req.method === "DELETE") {
+          const caseId = url.split("/")[3];
+          res.statusCode = 200;
+          return res.end(JSON.stringify({ status: "ok", message: `Case ${caseId} deleted`, case_id: caseId }));
+        }
+
+        if (url.startsWith("/v1/cases/") && url.endsWith("/logs") && req.method === "GET") {
+          const caseId = url.split("/")[3];
+          res.statusCode = 200;
+          return res.end(JSON.stringify({ case_id: caseId, total_events: 0, events: [] }));
+        }
+
+        if (url.startsWith("/v1/cases/") && url.endsWith("/dossier") && req.method === "GET") {
+          const caseId = url.split("/")[3];
+          res.statusCode = 200;
+          return res.end(
+            JSON.stringify({
+              case_id: caseId,
+              question: "Rotterdam critical terminal outage and northern rail rerouting evaluation",
+              as_of_date: "2027-01-25",
+              pack_id: DEMO_PACK.pack_id,
+              verification_status: "VERIFIED",
+              verification_reason: "Cross-verified with berth manifests and port authority bulletins.",
+              event_hypothesis: "Critical freight congestion at Maasvlakte II terminal",
+              countries: ["Netherlands", "Germany", "Belgium"],
+              sectors: ["Maritime", "Chemicals"],
+              claims_count: 2,
+              claims: [
+                {
+                  claim_id: "CLM-001",
+                  agent: "thor",
+                  country: "Netherlands",
+                  sector: "Maritime",
+                  low_estimate: 25,
+                  high_estimate: 45,
+                  claim: "Port throughput capacity drops significantly due to vessel congestion."
+                },
+                {
+                  claim_id: "CLM-002",
+                  agent: "loki",
+                  country: "Germany",
+                  sector: "Chemicals",
+                  low_estimate: 10,
+                  high_estimate: 20,
+                  claim: "Rhine barge rerouting dampens net supply disruption."
+                }
+              ],
+              challenges_count: 1,
+              challenges: [],
+              rulings_count: 2,
+              rulings: [
+                {
+                  claim_id: "CLM-001",
+                  verdict: "sustained",
+                  justification: "Supported by Rotterdam berth manifest evidence."
+                },
+                {
+                  claim_id: "CLM-002",
+                  verdict: "modified",
+                  justification: "Rail capacity constraints limit substitution."
+                }
+              ],
+              events_count: 2,
+              events: [
+                {
+                  trace_id: "trc-01",
+                  timestamp: new Date().toISOString(),
+                  agent: "thor",
+                  event_type: "CLAIM_ASSERTED",
+                  payload: { claim_id: "CLM-001", text: "Port throughput capacity drop" }
+                },
+                {
+                  trace_id: "trc-02",
+                  timestamp: new Date().toISOString(),
+                  agent: "odin",
+                  event_type: "JUDICIAL_RULING",
+                  payload: { claim_id: "CLM-001", verdict: "SUSTAINED" }
+                }
+              ]
             })
           );
         }

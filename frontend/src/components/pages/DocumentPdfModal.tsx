@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
+import { api } from "../../lib/api";
+import type { SourceDoc, TradeRowData } from "../../types/api";
 import "./document-pdf-modal.css";
 
 export interface DocumentRecord {
@@ -29,367 +31,8 @@ export interface DocumentRecord {
     retrievedAt?: string;
 }
 
-export const DOCUMENT_DATABASE: Record<string, DocumentRecord> = {
-    "ORV-0412": {
-        docId: "ORV-0412",
-        docName: "Rotterdam_Berth_Manifest_Q3.pdf",
-        agency: "PORT OF ROTTERDAM AUTHORITY · MARITIME LOGISTICS DIVISION",
-        title: "Maasvlakte II Deep-Water Container Terminal Congestion & Demurrage Audit",
-        classification: "RESTRICTED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-24",
-        signatureHash: "SHA256: 7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d9069",
-        retrievedAt: "14:32:08.412 UTC",
-        tradeRow: "T-07 row 5",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Executive Assessment & Deep-Water Berth Telemetry",
-                sections: [
-                    {
-                        heading: "1. Operational Status Overview",
-                        text: "This emergency situational report documents maritime offload constraints at the Maasvlakte deep-water complex following North Sea traffic channel bypass diversions. Container vessel queuing has escalated significantly beyond standard operating thresholds.",
-                    },
-                    {
-                        heading: "2. Demurrage Telemetry & Supply Chain Exposure",
-                        text: "Vessel queuing currently exceeds 42 Ultra-Large Container Vessels (ULCVs) at Maasvlakte berths 12 through 18. Average vessel wait time has increased to 9.4 days (+310% over pre-event baseline). Inbound raw polymers, industrial monomers, and bulk chemical feedstocks face indefinite demurrage, exceeding regional plant buffer capacities.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED CLAIM EXCERPT [THOR T-101 / EXPOSURE FR7.3]",
-                    },
-                    {
-                        text: "Downstream manufacturing facilities across Belgium and the Netherlands report feedstock reserve depletion within 14 days without emergency alternative barge allocation. Aggregate chemical sector trade value disruption is estimated between 40% and 55%.",
-                        isHighlighted: true,
-                    },
-                ],
-                tableData: {
-                    headers: ["Terminal", "Berth ID", "Vessels Waiting", "Avg Demurrage", "Commodity Focus"],
-                    rows: [
-                        ["Maasvlakte II", "Berth 12", "14 ULCVs", "9.4 Days", "Polymers & Liquid Chemicals"],
-                        ["Maasvlakte II", "Berth 14", "11 ULCVs", "8.7 Days", "Bulk Industrial Monomers"],
-                        ["Antwerp Gateway", "Berth 09", "17 ULCVs", "10.2 Days", "Petrochemical Resins"],
-                    ],
-                    highlightRowIndex: 0,
-                },
-            },
-            {
-                pageNumber: 2,
-                title: "Trade Flow Matrix & Sector Demurrage Table",
-                sections: [
-                    {
-                        heading: "3. Trade Row Annex (FR7.4 Telemetry)",
-                        text: "Customs manifest telemetry indicates that physical cargo arrival has decoupled from vessel arrival due to berth saturation. The following trade telemetry row records bilateral trade volume drop projections:",
-                    },
-                ],
-                tableData: {
-                    headers: ["Table Ref", "Trade Sector", "Country Pair", "Pre-Event Vol", "Projected Exposure", "Status"],
-                    rows: [
-                        ["T-07 row 1", "Refined Petroleum", "NL → DE", "420,000 MT", "12% to 18%", "Active"],
-                        ["T-07 row 3", "Industrial Nitrogen", "BE → FR", "115,000 MT", "20% to 28%", "Constrained"],
-                        ["T-07 row 5", "Polymers & Synthetic Resins", "Country A (NL/BE)", "310,000 MT", "40% to 55%", "Severe Demurrage"],
-                        ["T-07 row 8", "Basic Inorganics", "NL → UK", "85,000 MT", "15% to 22%", "Delayed"],
-                    ],
-                    highlightRowIndex: 2,
-                },
-            },
-            {
-                pageNumber: 3,
-                title: "Technical Corridor Alternatives & Feeder Feasibility",
-                sections: [
-                    {
-                        heading: "4. Secondary Transshipment Evaluation",
-                        text: "Attempts to divert ULCV traffic to secondary feeder terminals at Dunkirk and Wilhelmshaven have encountered secondary draft bottlenecks. Maximum draft constraints of 14.2m at Dunkirk exclude 85% of laden container ships.",
-                    },
-                    {
-                        heading: "5. Certification of Record",
-                        text: "Certified by Port of Rotterdam Operations Directorate. Admitted into Nine Realms Tribunal Docket under Evidence Reference ORV-0412.",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0388": {
-        docId: "ORV-0388",
-        docName: "Microelectronics_Supply_Route_Audit.pdf",
-        agency: "MINISTRY OF ECONOMIC AFFAIRS & TRADE CORRIDOR TASKFORCE",
-        title: "Malacca Strait Bypass Route Audit & Semiconductor Lead Times",
-        classification: "RESTRICTED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-23",
-        signatureHash: "SHA256: 4e912a78b88d3c16f001928374a5e62f0192a83746b5c4d3e2f1a09876543210",
-        retrievedAt: "14:32:15.388 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Critical Microelectronics Logistics Telemetry",
-                sections: [
-                    {
-                        heading: "1. Executive Findings: Maritime Choke Point Disruption",
-                        text: "Maritime transit diversions avoiding key maritime choke points have extended transit times between East Asian fabrication hubs and European assembly lines by 18 to 22 calendar days.",
-                    },
-                    {
-                        heading: "2. Automotive OEM Buffer Depletion",
-                        text: "Tier-2 semiconductor lead times have surged to 34 weeks (+12 weeks over standard baseline). Automotive OEM safety buffers are depleted within 12 days. Lead time inflation heavily impacts automotive microcontrollers (MCUs), while industrial programmable logic controllers (PLCs) retain distributor stocks.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED CLAIM EXCERPT [THOR T-102 / ODIN RULING]",
-                    },
-                    {
-                        text: "Exposure in automotive electronic components is projected between 25% and 42%. Dual-sourcing activation under ISO-9001 contracts provides partial mitigation.",
-                        isHighlighted: true,
-                    },
-                ],
-                tableData: {
-                    headers: ["Component Category", "Transit Route", "Lead Time Baseline", "Current Lead Time", "OEM Buffer"],
-                    rows: [
-                        ["Automotive MCUs (28nm)", "Malacca Bypass (Cape)", "22 Weeks", "34 Weeks", "12 Days"],
-                        ["Industrial PLCs", "Overland Rail", "16 Weeks", "20 Weeks", "38 Days"],
-                        ["Power MOSFETs", "Air / Sea Combined", "14 Weeks", "18 Weeks", "24 Days"],
-                    ],
-                    highlightRowIndex: 0,
-                },
-            },
-            {
-                pageNumber: 2,
-                title: "Commodity Trade Flows: Grain & Bulk Agro Corridors",
-                sections: [
-                    {
-                        heading: "3. Bulk Agro Transport Diversion",
-                        text: "Bulk grain carriers diverted to secondary rail and coastal corridors exhibit 10% to 18% expected trade volume drop. Seasonal silo reserves in Country A cushion initial shortfall.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED GRAIN SECTOR EXPOSURE [FR7.3 SPEC]",
-                    },
-                ],
-                tableData: {
-                    headers: ["Sector", "Origin / Dest", "Pre-Event Vol", "Projected Exposure", "Mitigation"],
-                    rows: [
-                        ["Grain & Cereals", "Country A → Regional Mills", "850,000 MT", "10% to 18%", "Domestic Silo Reserves"],
-                        ["Soybean Meal", "Country A → Feedlots", "320,000 MT", "15% to 24%", "Rail Freight Swaps"],
-                    ],
-                    highlightRowIndex: 0,
-                },
-            },
-        ],
-    },
-    "ORV-0501": {
-        docId: "ORV-0501",
-        docName: "Trade_Table_Commodities_Index.pdf",
-        agency: "EUROPEAN METAL & ALLOY EXCHANGES CLEARING CORPORATION",
-        title: "Precision Titanium & Specialty Alloys Spot Price Index and Force Majeure Notices",
-        classification: "CONFIDENTIAL · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-24",
-        signatureHash: "SHA256: 9b8a7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b",
-        retrievedAt: "14:32:22.501 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Specialty Alloys Spot Pricing & Bilateral Notices",
-                sections: [
-                    {
-                        heading: "1. Spot Price Surge Index",
-                        text: "Spot contracts for aerospace-grade titanium and specialty nickel alloys have spiked +44% on mercantile exchanges following raw sponge shipment delays.",
-                    },
-                    {
-                        heading: "2. Force Majeure Declarations",
-                        text: "Seven major precision casting and aerospace component suppliers have issued bilateral force majeure notices under ICC Article 79. Trade exposure is established at 38% to 48% (Country B / Germany).",
-                        isHighlighted: true,
-                        highlightLabel: "CITED CLAIM EXCERPT [THOR T-103 / ODIN ESTABLISHED]",
-                    },
-                ],
-                tableData: {
-                    headers: ["Material", "Exchange Spot Spike", "Force Majeure Status", "Exposure Range", "Region"],
-                    rows: [
-                        ["Titanium Ti-6Al-4V", "+44.2%", "Declared (7 Suppliers)", "38% to 48%", "Country B / Germany"],
-                        ["Inconel 718", "+28.6%", "Under Review", "20% to 30%", "Central Europe"],
-                        ["Specialty Stainless 316L", "+14.1%", "Standard Delivery", "10% to 16%", "Nordic Corridors"],
-                    ],
-                    highlightRowIndex: 0,
-                },
-            },
-        ],
-    },
-    "ORV-0711": {
-        docId: "ORV-0711",
-        docName: "EU_Energy_And_Reserves_Directive.pdf",
-        agency: "EUROPEAN COMMISSION · DIRECTORATE FOR STRATEGIC RESERVES",
-        title: "Sovereign Strategic Petroleum & Petrochemical Feedstock Buffer Audit",
-        classification: "RESTRICTED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-22",
-        signatureHash: "SHA256: 3c2b1a0f9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b",
-        retrievedAt: "14:32:30.711 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Sovereign Stockpile Availability & Buffer Cushion",
-                sections: [
-                    {
-                        heading: "1. Mandated Sovereign Reserves Audit",
-                        text: "Under Council Directive 2009/119/EC, sovereign member states maintain statutory petroleum and critical polymer feedstock reserves equal to 90 days of average daily consumption.",
-                    },
-                    {
-                        heading: "2. Strategic Stockpile Buffer Cushion",
-                        text: "Government-mandated reserves of critical polymers and diesel are fully primed at 94% statutory capacity. Sovereign release protocols ensure no industrial rationing is required before Day 45, limiting near-term exposure to 5% to 15%.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED COUNTER-CLAIM EXCERPT [LOKI L-201 / ODIN ESTABLISHED]",
-                    },
-                ],
-                tableData: {
-                    headers: ["Stockpile Category", "Current Prime Level", "Autonomy Cushion", "Disruption Floor", "Legal Basis"],
-                    rows: [
-                        ["Polymer Resins", "94.2%", "60 Days", "5% to 15%", "Council Directive 2009/119/EC"],
-                        ["Ultra-Low Sulfur Diesel", "96.1%", "75 Days", "3% to 8%", "Strategic Energy Reserve"],
-                        ["Chemical Solvents", "88.4%", "45 Days", "10% to 18%", "Industrial Buffer Protocol"],
-                    ],
-                    highlightRowIndex: 0,
-                },
-            },
-        ],
-    },
-    "ORV-0544": {
-        docId: "ORV-0544",
-        docName: "Master_Supplier_Agreements_Annex_C.pdf",
-        agency: "INTERNATIONAL ELECTRONICS & MANUFACTURING STANDARDS AUTHORITY",
-        title: "ISO-9001 Master Supplier Agreements: Dual-Sourcing & Failover SLAs",
-        classification: "CONFIDENTIAL · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-21",
-        signatureHash: "SHA256: 1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c9b0a1f2e",
-        retrievedAt: "14:32:38.544 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Automated Dual-Sourcing Protocol Verification",
-                sections: [
-                    {
-                        heading: "1. Failover Provisions & Legal SLAs",
-                        text: "Master contracts under ISO-9001 Annex C mandate automated secondary supplier activation within 72 hours of primary shipping choke point declaration.",
-                    },
-                    {
-                        heading: "2. Secondary Capacity Absorption",
-                        text: "Alternative semiconductor fabrication corridors across Iberia and Turkey retain contracted capacity to absorb up to 60% of tier-1 microelectronics shortfalls, holding exposure between 10% and 22%.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED DEFENSE EXCERPT [LOKI L-202 / ODIN ESTABLISHED]",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0622": {
-        docId: "ORV-0622",
-        docName: "Central_Eurasian_Rail_Throughput.pdf",
-        agency: "CENTRAL EURASIAN INTERMODAL RAILWAY DIRECTORATE",
-        title: "Intermodal Break-of-Gauge Telemetry & Polish Border Capacity Report",
-        classification: "RESTRICTED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-23",
-        signatureHash: "SHA256: 8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e7d",
-        retrievedAt: "14:32:44.622 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Overland Rail Hub Congestion",
-                sections: [
-                    {
-                        heading: "1. Gauge Capacity Telemetry",
-                        text: "Overland freight hubs along Polish and Kazakh corridors are currently operating at 180% gauge capacity. Transshipment yards cannot fully absorb maritime diversions without 12-day rolling clearance queues.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED CLAIM EXCERPT [THOR T-104 / ODIN CONTESTED]",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0490": {
-        docId: "ORV-0490",
-        docName: "Global_Air_Cargo_Availability_Matrix.pdf",
-        agency: "INTERNATIONAL AIR TRANSPORT ASSOCIATION (IATA)",
-        title: "Commercial Belly-Cargo Feasibility & Widebody Charter Rate Analysis",
-        classification: "UNCLASSIFIED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-22",
-        signatureHash: "SHA256: 2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b3c",
-        retrievedAt: "14:32:50.490 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Air Bridge Commercial Analysis",
-                sections: [
-                    {
-                        heading: "1. Feasibility Benchmark",
-                        text: "Initial proposals for widebody passenger belly-cargo air bridges for microelectronics face extreme jet fuel surcharge inflation (+210%), rendering mass air bridge transportation commercially unviable for volume production.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED ATTACK EXCERPT [LOKI L-203 CONCEDED]",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0680": {
-        docId: "ORV-0680",
-        docName: "Commodity_Exchange_Spot_Deliveries.pdf",
-        agency: "ROTTERDAM MERCANTILE CLEARING & PHYSICAL DELIVERY LEDGER",
-        title: "Bilateral Spot Cargo Inflows & Paper Speculation De-coupling Audit",
-        classification: "RESTRICTED · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-24",
-        signatureHash: "SHA256: 5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b",
-        retrievedAt: "14:32:56.680 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Physical Delivery vs Futures Panic",
-                sections: [
-                    {
-                        heading: "1. Physical Customs Clearances",
-                        text: "Commodity customs manifests confirm steady bilateral physical deliveries across Rotterdam inland waterways. Price spikes are identified primarily as paper futures speculation rather than physical cargo stoppage.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED DEFENSE EXCERPT [LOKI L-204 / ODIN CONTESTED]",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0899": {
-        docId: "ORV-0899",
-        docName: "Rhine_Barge_Low_Water_Draft_Advisory.pdf",
-        agency: "CENTRAL COMMISSION FOR NAVIGATION ON THE RHINE (CCNR)",
-        title: "Secondary Feeder Draft Depths & Barge Transshipment Advisory",
-        classification: "OFFICIAL · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-24",
-        signatureHash: "SHA256: 7d8c9b0a1f2e3d4c5b6a7f8e9d0c1b2a3f4e5d6c7b8a9f0e1d2c3b4a5f6e7d8c",
-        retrievedAt: "14:33:02.899 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Rhine Low-Water Draft Constraints",
-                sections: [
-                    {
-                        heading: "1. Draft Telemetry Constraints",
-                        text: "Secondary feeder drafts at Rhine terminals cannot accommodate deep-water container diversion. ULCV bulk resin polymers cannot be transshipped via shallow river barges.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED REBUTTAL EXCERPT [THOR REBUTTAL TO LOKI ATTACK]",
-                    },
-                ],
-            },
-        ],
-    },
-    "ORV-0771": {
-        docId: "ORV-0771",
-        docName: "IATA_Fuel_Surcharge_Matrix_2026.pdf",
-        agency: "INTERNATIONAL AIR TRANSPORT ASSOCIATION (IATA)",
-        title: "Global Aviation Fuel Surcharges & Commercial Air Freight Viability Index",
-        classification: "OFFICIAL · TRIBUNAL DOCKET EXHIBIT",
-        date: "2026-10-23",
-        signatureHash: "SHA256: 4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b",
-        retrievedAt: "14:33:09.771 UTC",
-        pages: [
-            {
-                pageNumber: 1,
-                title: "Fuel Surcharge Cost Escalation",
-                sections: [
-                    {
-                        heading: "1. Fuel Surcharge Benchmark",
-                        text: "Verified aviation fuel surcharges of +210% exceed economic feasibility margins for tier-2 bulk automotive components. Air bridge commercial non-viability upheld.",
-                        isHighlighted: true,
-                        highlightLabel: "CITED ATTACK EVIDENCE [THOR ATTACK ON LOKI L-203]",
-                    },
-                ],
-            },
-        ],
-    },
-};
+export const DOCUMENT_DATABASE: Record<string, DocumentRecord> = {};
+
 
 interface Props {
     docId: string;
@@ -398,22 +41,99 @@ interface Props {
 }
 
 export default function DocumentPdfModal({ docId, tradeRow, onClose }: Props) {
+    const cleanDocId = useMemo(() => docId.split(":")[0].trim(), [docId]);
+    const cleanRow = useMemo(() => tradeRow || (docId.includes(":") ? docId.split(":")[1].trim() : undefined), [docId, tradeRow]);
+
+    const [backendDoc, setBackendDoc] = useState<SourceDoc | null>(null);
+    const [clockViolation, setClockViolation] = useState<string | null>(null);
+    const [viewEmbed, setViewEmbed] = useState(false);
+
+    useEffect(() => {
+        let active = true;
+        setClockViolation(null);
+        api.getSource(cleanDocId)
+            .then((res) => {
+                if (active) setBackendDoc(res);
+            })
+            .catch((err) => {
+                if (!active) return;
+                const msg = err.message || String(err);
+                if (err.status === 403 || msg.includes("CLOCK_VIOLATION")) {
+                    setClockViolation(msg);
+                }
+            });
+        return () => {
+            active = false;
+        };
+    }, [cleanDocId]);
+
+    const evidentiaryScore = useMemo(() => {
+        const docTier = backendDoc?.tier ?? 1;
+        const tierScore = Math.max(0.1, (5 - Math.min(Math.max(docTier, 1), 4)) / 4.0);
+        let recencyScore = 0.5;
+        if (backendDoc?.pub_date) {
+            const pub = new Date(backendDoc.pub_date).getTime();
+            const asOf = new Date("2027-01-25").getTime();
+            const days = Math.max(0, Math.floor((asOf - pub) / (1000 * 60 * 60 * 24)));
+            recencyScore = Math.max(0.1, 1.0 - (days / 365.0));
+        }
+        return Math.round((0.70 * tierScore + 0.30 * recencyScore) * 100);
+    }, [backendDoc]);
+
     const doc = useMemo(() => {
-        // Direct match or lookup from DB
-        const match = DOCUMENT_DATABASE[docId];
+        // 1. Direct match from hardcoded DB
+        const match = DOCUMENT_DATABASE[cleanDocId];
+        if (match && !backendDoc) return match;
+
+        // 2. If backend returned document, build rich record from live text
+        if (backendDoc) {
+            const paragraphs = backendDoc.text
+                .split(/\n\n+/)
+                .map((p) => p.trim())
+                .filter(Boolean);
+
+            const sections = paragraphs.map((para, idx) => ({
+                heading: idx === 0 ? "1. Official Register Telemetry" : undefined,
+                text: para,
+                isHighlighted: cleanRow ? para.toLowerCase().includes(cleanRow.toLowerCase()) : idx === 1,
+                highlightLabel: idx === 1 ? "CITED CLAIM EXCERPT [OFFICIAL DOCKET]" : undefined,
+            }));
+
+            return {
+                docId: backendDoc.doc_id,
+                docName: backendDoc.file_name || `${backendDoc.doc_id}.${backendDoc.format || "pdf"}`,
+                agency: backendDoc.source_name || "RUNEMARK DOCKET ARCHIVE",
+                title: backendDoc.title || `Official Source: ${backendDoc.doc_id}`,
+                classification: backendDoc.tier <= 1 ? "OFFICIAL · TRIBUNAL DOCKET EXHIBIT" : "RESTRICTED WIRE",
+                date: backendDoc.pub_date || "2027-01-25",
+                signatureHash: `SHA256: 7f83b1657ff1fc53b92dc18148a1d65d${cleanDocId}2027`,
+                retrievedAt: backendDoc.pub_time || "09:30 UTC",
+                tradeRow: cleanRow || tradeRow || "Verified Telemetry Record",
+                pages: [
+                    {
+                        pageNumber: 1,
+                        title: backendDoc.title || "Evidentiary Extract",
+                        sections: sections.length > 0 ? sections : [
+                            { heading: "1. Admissible Text", text: backendDoc.text, isHighlighted: true }
+                        ],
+                    },
+                ],
+            };
+        }
+
         if (match) return match;
 
-        // Fallback for custom or trade-row only IDs
+        // 3. Fallback for custom or trade-row only IDs
         return {
-            docId,
-            docName: `${docId.replace(/[^a-zA-Z0-9_-]/g, "_")}_Official_Record.pdf`,
+            docId: cleanDocId,
+            docName: `${cleanDocId.replace(/[^a-zA-Z0-9_-]/g, "_")}_Official_Record.pdf`,
             agency: "NINE REALMS TRIBUNAL · DOCKET EVIDENCE REPOSITORY",
-            title: `Official Evidence Dossier: ${docId}`,
+            title: `Official Evidence Dossier: ${cleanDocId}`,
             classification: "CONFIDENTIAL · TRIBUNAL DOCKET EXHIBIT",
-            date: "2026-10-24",
-            signatureHash: `SHA256: ${Array.from(docId).map((c) => c.charCodeAt(0).toString(16)).join("")}4a5b6c7d8e9f0`,
+            date: "2027-01-25",
+            signatureHash: `SHA256: ${Array.from(cleanDocId).map((c) => c.charCodeAt(0).toString(16)).join("")}4a5b6c7d8e9f0`,
             retrievedAt: "14:32:00.000 UTC",
-            tradeRow: tradeRow || "Trade Row Telemetry",
+            tradeRow: cleanRow || tradeRow || "Trade Row Telemetry",
             pages: [
                 {
                     pageNumber: 1,
@@ -421,13 +141,13 @@ export default function DocumentPdfModal({ docId, tradeRow, onClose }: Props) {
                     sections: [
                         {
                             heading: "1. Admissible Docket Entry",
-                            text: `This evidentiary record is filed under docket identification ${docId}. It contains verified maritime, trade flow, or sovereign buffer telemetry admitted into the Nine Realms adversarial trial.`,
+                            text: `This evidentiary record is filed under docket identification ${cleanDocId}. It contains verified maritime, trade flow, or sovereign buffer telemetry admitted into the Nine Realms adversarial trial.`,
                         },
                         {
                             heading: "2. Telemetry Extract",
-                            text: tradeRow
-                                ? `Specific trade row extract referenced: ${tradeRow}. Trade flow data confirms bilateral disruption impact within the sector.`
-                                : `Verified trade data supporting claim calculations for docket item ${docId}.`,
+                            text: cleanRow
+                                ? `Specific trade row extract referenced: ${cleanRow}. Trade flow data confirms bilateral disruption impact within the sector.`
+                                : `Verified trade data supporting claim calculations for docket item ${cleanDocId}.`,
                             isHighlighted: true,
                             highlightLabel: "OFFICIAL DOCKET CITATION",
                         },
@@ -435,7 +155,7 @@ export default function DocumentPdfModal({ docId, tradeRow, onClose }: Props) {
                 },
             ],
         };
-    }, [docId, tradeRow]);
+    }, [cleanDocId, cleanRow, backendDoc, tradeRow]);
 
     const [currentPage, setCurrentPage] = useState(1);
     const [zoom, setZoom] = useState(100);
@@ -452,24 +172,11 @@ export default function DocumentPdfModal({ docId, tradeRow, onClose }: Props) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [onClose]);
 
-    // Handle PDF Download simulation
+    // Handle PDF Download
     const handleDownload = useCallback(() => {
-        const content = `%PDF-1.4
-%Nine Realms Evidence Record: ${doc.docId}
-1 0 obj << /Title (${doc.title}) /Author (${doc.agency}) >> endobj
-2 0 obj << /Type /Catalog /Pages 3 0 R >> endobj
-trailer << /Root 2 0 R >>
-%%EOF`;
-        const blob = new Blob([content], { type: "application/pdf" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = doc.docName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }, [doc]);
+        const fileUrl = api.getSourceFileUrl(cleanDocId);
+        window.open(fileUrl, "_blank");
+    }, [cleanDocId]);
 
     return createPortal(
         <div
@@ -490,6 +197,9 @@ trailer << /Root 2 0 R >>
                             <span className="rg-pdf-filename">{doc.docName}</span>
                             <span className="rg-pdf-docid-badge">{doc.docId}</span>
                             <span className="rg-pdf-verified-badge">✓ Heimdall Verified</span>
+                            <span className="rg-pdf-score-badge" style={{ background: "rgba(234, 179, 8, 0.18)", border: "1px solid #eab308", color: "#fef08a", padding: "2px 8px", borderRadius: "10px", fontSize: "11px", fontWeight: 700 }}>
+                                ⭐ {evidentiaryScore}% Admissible (70% Tier {backendDoc?.tier ?? 1} · 30% Recency)
+                            </span>
                         </div>
                     </div>
 
@@ -549,10 +259,26 @@ trailer << /Root 2 0 R >>
                         <button
                             type="button"
                             className="rg-pdf-action-btn"
-                            onClick={handleDownload}
-                            title="Download original PDF document"
+                            onClick={() => setViewEmbed((v) => !v)}
+                            title="Toggle between formatted docket view and raw file embed"
                         >
-                            ⬇ Download PDF
+                            {viewEmbed ? "📄 Docket Sheet" : "🖥 Raw File Embed"}
+                        </button>
+                        <button
+                            type="button"
+                            className="rg-pdf-action-btn"
+                            onClick={() => window.open(api.getSourceFileUrl(cleanDocId), "_blank")}
+                            title="Open exact PDF / document file in a new browser tab"
+                        >
+                            ↗ Open File Tab
+                        </button>
+                        <button
+                            type="button"
+                            className="rg-pdf-action-btn"
+                            onClick={handleDownload}
+                            title="Download original document"
+                        >
+                            ⬇ Download
                         </button>
                         <button
                             type="button"
@@ -576,14 +302,42 @@ trailer << /Root 2 0 R >>
 
                 {/* PDF Viewer Body & Rendered Paper Sheet */}
                 <div className="rg-pdf-body-viewport">
-                    <div
-                        className="rg-pdf-paper-sheet"
-                        style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
-                    >
-                        {/* Security Watermark */}
-                        <div className="rg-pdf-watermark" aria-hidden="true">
-                            RUNEMARK TRIBUNAL EVIDENCE · CONFIDENTIAL DOCKET
+                    {clockViolation && (
+                        <div style={{
+                            background: "rgba(239, 68, 68, 0.2)",
+                            border: "1px solid #ef4444",
+                            color: "#fca5a5",
+                            padding: "12px 18px",
+                            margin: "12px auto",
+                            maxWidth: 820,
+                            borderRadius: 6,
+                            fontWeight: 600,
+                            fontSize: 13,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10
+                        }}>
+                            <span>⚠️</span>
+                            <span>{clockViolation}</span>
                         </div>
+                    )}
+                    {viewEmbed ? (
+                        <div style={{ width: "100%", height: "82vh", padding: 12 }}>
+                            <iframe
+                                src={api.getSourceFileUrl(cleanDocId)}
+                                title={doc.docName}
+                                style={{ width: "100%", height: "100%", border: "none", borderRadius: 8, background: "#fff" }}
+                            />
+                        </div>
+                    ) : (
+                        <div
+                            className="rg-pdf-paper-sheet"
+                            style={{ transform: `scale(${zoom / 100})`, transformOrigin: "top center" }}
+                        >
+                            {/* Security Watermark */}
+                            <div className="rg-pdf-watermark" aria-hidden="true">
+                                RUNEMARK TRIBUNAL EVIDENCE · CONFIDENTIAL DOCKET
+                            </div>
 
                         {/* Letterhead Header */}
                         <div className="rg-pdf-letterhead">
@@ -675,6 +429,7 @@ trailer << /Root 2 0 R >>
                             </div>
                         </div>
                     </div>
+                    )}
                 </div>
             </div>
         </div>,

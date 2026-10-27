@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes, useNavigate } from "react-route
 import Landing from "./components/pages/Landing";
 import AppShell from "./components/layout/AppShell";
 import CaseIntake from "./components/pages/CaseIntake";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 function LandingRoute() {
   const navigate = useNavigate();
@@ -10,14 +11,16 @@ function LandingRoute() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<LandingRoute />} />
-        <Route element={<AppShell />}>
-          <Route path="/cases/new" element={<CaseIntake />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingRoute />} />
+          <Route element={<AppShell />}>
+            <Route path="/cases/new" element={<CaseIntake />} />
+          </Route>
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
